@@ -20,10 +20,10 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 .crop-banner{width:100%;height:220px;object-fit:cover;display:block;background:var(--g3)}
 .modules-section{flex:1;padding:2rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem}
 .modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;width:100%;max-width:860px}
-.module-card{background:var(--paper);border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:1rem;transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;border:1.5px solid var(--border)}
+.module-card{background:var(--paper);border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:1rem;transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;border:1.5px solid var(--border)}
 .module-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.14);border-color:var(--g3)}
 .module-icon{width:56px;height:56px;border-radius:12px;background:var(--tag-bg);display:flex;align-items:center;justify-content:center;font-size:1.6rem}
-.module-card h3{font-size:1.05rem;font-weight:700;color:var(--g2)}
+.module-card h3{font-size:1.15rem;font-weight:700;color:var(--g2)}
 .module-card p{font-size:.84rem;color:var(--muted);line-height:1.55;flex:1}
 .module-stats{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.25rem}
 .stat-tag{background:var(--tag-bg);color:var(--tag-fg);font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:12px;font-family:'IBM Plex Mono',monospace}
@@ -57,29 +57,9 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 </header>
 
 <div class="hero">
-  <div class="hero-bg" id="hero-bg"></div>
-  <div class="hero-content">
-    <h2>Consulta avançada de fitofarmacêuticos</h2>
-    <p>Dois módulos de pesquisa sobre produtos fitofarmacêuticos autorizados e cancelados em Portugal, com base nos dados oficiais da DGAV.</p>
-  </div>
+  <h2>Consulta avançada de fitofarmacêuticos</h2>
+  <p>Dois módulos de pesquisa sobre produtos fitofarmacêuticos autorizados e cancelados em Portugal, com base nos dados oficiais da DGAV.</p>
 </div>
-<script>
-(function(){
-  var imgs=[
-    'photo-1464226184884-fa280b87c399', // campo agrícola
-    'photo-1625246333195-78d9c38ad449', // trigo
-    'photo-1474440692490-2e83ae13ba29', // vinha
-    'photo-1560493676-04071c5f467b',    // culturas em linha
-    'photo-1595435934249-5df7ed86e1c0', // olival
-    'photo-1500076656116-558758c991c1', // vinha pôr do sol
-    'photo-1523348837708-15d4a09cfac2', // tomate
-    'photo-1416879595882-3373a0480b5b', // flores de pomar
-  ];
-  var id=imgs[Math.floor(Math.random()*imgs.length)];
-  document.getElementById('hero-bg').style.backgroundImage=
-    'url(https://images.unsplash.com/'+id+'?w=1400&h=280&fit=crop&q=75&auto=format)';
-})();
-</script>
 <img id="crop-img" class="crop-banner" alt="Cultura agrícola" src="">
 <script>
 (function(){
@@ -133,7 +113,6 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
       Os dados são actualizados automaticamente mas podem não reflectir alterações em tempo real.
     </span>
   </div>
-</div>
 
 <div class="attribution">
   <p><strong>Fonte de dados:</strong> DGAV — Direção-Geral de Alimentação e Veterinária &nbsp;·&nbsp; Sistema de Informação Fitofarmacêutico <a href="https://sifito.dgav.pt/" target="_blank">SIFITO</a></p>

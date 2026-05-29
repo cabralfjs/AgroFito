@@ -16,7 +16,7 @@
   --sh:0 2px 16px rgba(0,0,0,.09);--sh2:0 8px 40px rgba(0,0,0,.16);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px;min-width:980px}
+body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px}
 
 /* HEADER */
 header{
@@ -118,7 +118,7 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 
 /* STICKY FIX: sem overflow no table wrapper, min-width no body → sticky funciona */
 
-#table-wrap{padding:1rem 1.5rem 1.5rem}
+#table-wrap{padding:1rem 1.5rem 1.5rem;overflow-x:auto;overflow-y:clip}
 table{
   width:100%;border-collapse:collapse;
   background:#fff;font-size:.78rem;
@@ -684,10 +684,21 @@ function buildSelects(){
 
 function updateCascadeSelects(){
   const exactCult = cbGetValue('cultura').exact;
-  const pool = exactCult ? ALL.filter(r=>r.cultura===exactCult) : ALL;
+  const exactInim = cbGetValue('inimigo').exact;
+
+  // Inimigo: filtrado por Cultura
+  const cultPool = exactCult ? ALL.filter(r=>r.cultura===exactCult) : ALL;
+  // Nome Científico: filtrado por Cultura + Inimigo
+  const nomcPool = exactInim ? cultPool.filter(r=>r.inimigo===exactInim) : cultPool;
+
   const sorted=(set)=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
-  cbPopulate('inimigo', sorted(new Set(pool.map(r=>r.inimigo||''))));
-  cbPopulate('nomc',    sorted(new Set(pool.map(r=>r.nome_cient||''))));
+  cbPopulate('inimigo', sorted(new Set(cultPool.map(r=>r.inimigo||''))));
+  cbPopulate('nomc',    sorted(new Set(nomcPool.map(r=>r.nome_cient||''))));
+
+  // Função também em cascata (baseada na Cultura)
+  const fSet=new Set();
+  cultPool.forEach(r=>{ if(r.funcao) fSet.add(r.funcao.split(',')[0].trim()); });
+  fillSel('f-funcao', sorted(fSet));
 }
 
 function fillSel(id, values){
@@ -728,6 +739,7 @@ function cbInit(id){
     clear.style.display = input.value ? 'block' : 'none';
     wrap.classList.add('open');
     cbRenderList(id, input.value);
+    if(id === 'inimigo') setTimeout(updateCascadeSelects, 0);
     applyFilters(); // ← aplica partial match imediatamente
   });
 
@@ -825,8 +837,8 @@ function cbSelect(id, val){
   const clear = document.getElementById(`cb-${id}-clear`);
   input.value  = val;
   clear.style.display = val ? 'block' : 'none';
-  // Quando a Cultura muda por selecção exacta, actualiza cascata
-  if(id === 'cultura') setTimeout(updateCascadeSelects, 0);
+  // Cultura ou Inimigo mudaram — actualiza cascata
+  if(id === 'cultura' || id === 'inimigo') setTimeout(updateCascadeSelects, 0);
 }
 
 // Retorna o valor para filtrar: selecção exacta ou texto digitado

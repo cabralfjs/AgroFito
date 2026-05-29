@@ -9,7 +9,7 @@
 <style>
 :root{--g1:#0f3d22;--g2:#1a5c35;--g3:#2d7a4f;--lime:#7cb83a;--lime2:#c5e89a;--cream:#f4f0e8;--paper:#fdfaf4;--ink:#18180f;--muted:#6b6b5a;--border:#d6d0c4;--border2:#c4bfb2;--accent:#d4860e;--red:#b83232;--blue:#1a6699;--tag-bg:#e6f2da;--tag-fg:#1a5c35;--sh:0 2px 16px rgba(0,0,0,.09);--sticky-top:116px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px;min-width:980px}
+body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px}
 /* HEADER */
 header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 100%);color:#fff;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,.25)}
 header h1{font-size:.88rem;font-weight:700;flex:1;letter-spacing:-.01em}
@@ -72,12 +72,12 @@ header h1{font-size:.88rem;font-weight:700;flex:1;letter-spacing:-.01em}
 .legend-item{font-weight:500;white-space:nowrap}
 .legend-sep{color:var(--border2)}
 /* TABLE */
-#table-wrap{padding:1rem 1.5rem 1.5rem}
+#table-wrap{padding:1rem 1.5rem 1.5rem;overflow-x:auto;overflow-y:clip}
 table{width:100%;border-collapse:collapse;background:#fff;font-size:.78rem;border-radius:10px;box-shadow:var(--sh)}
 thead tr th:first-child{border-radius:10px 0 0 0}
 thead tr th:last-child{border-radius:0 10px 0 0}
 thead{position:sticky;top:var(--sticky-top,116px);z-index:20;background:var(--g1);color:#fff}
-thead th{background:var(--g1);padding:.75rem .9rem;text-align:left;font-weight:600;font-size:.67rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s;border-bottom:2px solid var(--g3)}
+thead th{position:sticky;top:var(--sticky-top,116px);z-index:20;background:var(--g1);padding:.75rem .9rem;text-align:left;font-weight:600;font-size:.67rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s;border-bottom:2px solid var(--g3)}
 thead th:hover{background:var(--g2)}
 thead th.sorted{background:var(--g3)}
 .sort-ic{margin-left:.3rem;opacity:.45;font-size:.75em}
@@ -486,10 +486,24 @@ function updateHeaderMeta(){
 /* ══ BUILD SELECTS ══ */
 function buildSelects(){
   const sorted=set=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
-  cbPopulate('titular',  sorted(new Set(ALL.map(r=>r.titular||''))));
-  cbPopulate('substancia',sorted(new Set(ALL.map(r=>r.substancia||''))));
-  fillSel('f-funcao-tipo',sorted(new Set(ALL.map(r=>r.funcao_tipo||''))));
-  fillSel('f-formulacao', sorted(new Set(ALL.map(r=>r.formulacao||''))));
+  cbPopulate('titular', sorted(new Set(ALL.map(r=>r.titular||''))));
+  updateCascadeSelectsProd();
+}
+
+function updateCascadeSelectsProd(){
+  const exactTit = cbGetValue('titular').exact;
+  const exactSub = cbGetValue('substancia').exact;
+
+  // Titular → filtra Substância
+  const titPool = exactTit ? ALL.filter(r=>r.titular===exactTit) : ALL;
+
+  // Titular + Substância → filtra Formulação e Função Tipo
+  const subPool = exactSub ? titPool.filter(r=>r.substancia===exactSub) : titPool;
+
+  const sorted=set=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
+  cbPopulate('substancia',  sorted(new Set(titPool.map(r=>r.substancia||''))));
+  fillSel('f-funcao-tipo',  sorted(new Set(subPool.map(r=>r.funcao_tipo||''))));
+  fillSel('f-formulacao',   sorted(new Set(subPool.map(r=>r.formulacao||''))));
 }
 
 function fillSel(id,values){
@@ -504,7 +518,7 @@ function cbInit(id){
   CB[id]={options:[],selected:''};
   const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`),arrow=document.getElementById(`cb-${id}-arrow`),wrap=document.getElementById(`cb-${id}`);
   arrow.addEventListener('click',e=>{e.stopPropagation();const isOpen=wrap.classList.contains('open');closeAllCB();if(!isOpen){wrap.classList.add('open');cbRenderList(id,'');input.focus();}});
-  input.addEventListener('input',()=>{CB[id].selected='';clear.style.display=input.value?'block':'none';wrap.classList.add('open');cbRenderList(id,input.value);applyFilters();});
+  input.addEventListener('input',()=>{CB[id].selected='';clear.style.display=input.value?'block':'none';wrap.classList.add('open');cbRenderList(id,input.value);if(id==='titular'||id==='substancia')setTimeout(updateCascadeSelectsProd,0);applyFilters();});
   input.addEventListener('focus',()=>{if(!wrap.classList.contains('open')){wrap.classList.add('open');cbRenderList(id,input.value);}});
   clear.addEventListener('click',e=>{e.stopPropagation();cbSelect(id,'');wrap.classList.remove('open');applyFilters();});
   input.addEventListener('keydown',e=>{
@@ -526,7 +540,7 @@ function cbRenderList(id,query){
   list.innerHTML=html;
   list.querySelectorAll('.cb-opt').forEach(el=>el.addEventListener('mousedown',e=>{e.preventDefault();cbSelect(id,el.dataset.val);closeAllCB();applyFilters();}));
 }
-function cbSelect(id,val){if(!CB[id])return;CB[id].selected=val;const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`);input.value=val;clear.style.display=val?'block':'none';}
+function cbSelect(id,val){if(!CB[id])return;CB[id].selected=val;const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`);input.value=val;clear.style.display=val?'block':'none';if(id==='titular'||id==='substancia')setTimeout(updateCascadeSelectsProd,0);}
 function cbGetValue(id){const sel=CB[id]?.selected||'',typed=document.getElementById(`cb-${id}-input`)?.value?.trim()||'';return{exact:sel,text:sel||typed};}
 function closeAllCB(){document.querySelectorAll('.cb-wrap.open').forEach(w=>w.classList.remove('open'));}
 document.addEventListener('mousedown',e=>{if(!e.target.closest('.cb-wrap'))closeAllCB();});
@@ -570,7 +584,7 @@ function clearFilters(){
   document.getElementById('search').value='';
   ['f-funcao-tipo','f-formulacao','f-mpb','f-baixo','f-estado'].forEach(id=>document.getElementById(id).value='');
   cbSelect('titular','');cbSelect('substancia','');
-  SORT_COL=null;SORT_ASC=true;rebuildALL();buildSelects();applyFilters();
+  SORT_COL=null;SORT_ASC=true;rebuildALL();buildSelects();updateCascadeSelectsProd();applyFilters();
 }
 
 /* ══ RENDER ══ */

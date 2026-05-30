@@ -31,7 +31,7 @@ header h1{font-size:.88rem;font-weight:700;flex:1;letter-spacing:-.01em}
 .progress-fill{height:100%;background:var(--g3);transition:width .3s;width:0}
 .progress-label{font-size:.75rem;color:var(--muted);margin-top:.4rem;font-family:'IBM Plex Mono',monospace}
 /* TOOLBAR */
-#toolbar{background:var(--paper);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:none;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+#toolbar{background:var(--paper);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:none;flex-wrap:wrap;gap:.6rem;align-items:flex-end;position:sticky;top:58px;z-index:100}
 #toolbar.active{display:flex}
 .search-wrap{flex:1;min-width:200px;position:relative}
 .search-wrap input{width:100%;padding:.55rem .8rem .55rem 2.3rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:.83rem;background:#fff;transition:border-color .2s;color:var(--ink)}
@@ -76,8 +76,8 @@ header h1{font-size:.88rem;font-weight:700;flex:1;letter-spacing:-.01em}
 table{width:100%;border-collapse:collapse;background:#fff;font-size:.78rem;border-radius:10px;box-shadow:var(--sh)}
 thead tr th:first-child{border-radius:10px 0 0 0}
 thead tr th:last-child{border-radius:0 10px 0 0}
-thead{position:sticky;top:var(--sticky-top,116px);z-index:20;background:var(--g1);color:#fff}
-thead th{background:var(--g1);padding:.75rem .9rem;text-align:left;font-weight:600;font-size:.67rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s;border-bottom:2px solid var(--g3)}
+thead{background:var(--g1);color:#fff}
+thead th{position:sticky;top:var(--sticky-top,116px);z-index:20;background:var(--g1);padding:.75rem .9rem;text-align:left;font-weight:600;font-size:.67rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s;border-bottom:2px solid var(--g3)}
 thead th:hover{background:var(--g2)}
 thead th.sorted{background:var(--g3)}
 .sort-ic{margin-left:.3rem;opacity:.45;font-size:.75em}

@@ -684,10 +684,22 @@ function buildSelects(){
 
 function updateCascadeSelects(){
   const exactCult = cbGetValue('cultura').exact;
-  const pool = exactCult ? ALL.filter(r=>r.cultura===exactCult) : ALL;
+  const exactInim = cbGetValue('inimigo').exact;
+
+  // Cultura → pool para Inimigo
+  const cultPool = exactCult ? ALL.filter(r=>r.cultura===exactCult) : ALL;
+
+  // Cultura + Inimigo → pool para Nome Científico e Função
+  const inimPool = exactInim ? cultPool.filter(r=>r.inimigo===exactInim) : cultPool;
+
   const sorted=(set)=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
-  cbPopulate('inimigo', sorted(new Set(pool.map(r=>r.inimigo||''))));
-  cbPopulate('nomc',    sorted(new Set(pool.map(r=>r.nome_cient||''))));
+
+  cbPopulate('inimigo', sorted(new Set(cultPool.map(r=>r.inimigo||''))));
+  cbPopulate('nomc',    sorted(new Set(inimPool.map(r=>r.nome_cient||''))));
+
+  const fSet=new Set();
+  inimPool.forEach(r=>{ if(r.funcao) fSet.add(r.funcao.split(',')[0].trim()); });
+  fillSel('f-funcao', sorted(fSet));
 }
 
 function fillSel(id, values){
@@ -728,6 +740,8 @@ function cbInit(id){
     clear.style.display = input.value ? 'block' : 'none';
     wrap.classList.add('open');
     cbRenderList(id, input.value);
+    // Cultura ou Inimigo → re-cascata ao escrever
+    if(id === 'cultura' || id === 'inimigo') setTimeout(updateCascadeSelects, 0);
     applyFilters(); // ← aplica partial match imediatamente
   });
 

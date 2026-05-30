@@ -486,10 +486,26 @@ function updateHeaderMeta(){
 /* ══ BUILD SELECTS ══ */
 function buildSelects(){
   const sorted=set=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
-  cbPopulate('titular',  sorted(new Set(ALL.map(r=>r.titular||''))));
-  cbPopulate('substancia',sorted(new Set(ALL.map(r=>r.substancia||''))));
-  fillSel('f-funcao-tipo',sorted(new Set(ALL.map(r=>r.funcao_tipo||''))));
-  fillSel('f-formulacao', sorted(new Set(ALL.map(r=>r.formulacao||''))));
+  // Titular é sempre construído a partir de ALL
+  cbPopulate('titular', sorted(new Set(ALL.map(r=>r.titular||''))));
+  // O resto em cascata
+  updateCascadeSelectsProd();
+}
+
+function updateCascadeSelectsProd(){
+  const exactTit = cbGetValue('titular').exact;
+  const exactSub = cbGetValue('substancia').exact;
+
+  // Titular → filtra Substância
+  const titPool = exactTit ? ALL.filter(r=>r.titular===exactTit) : ALL;
+
+  // Titular + Substância → filtra Formulação e Função Tipo
+  const subPool = exactSub ? titPool.filter(r=>r.substancia===exactSub) : titPool;
+
+  const sorted=set=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
+  cbPopulate('substancia',  sorted(new Set(titPool.map(r=>r.substancia||''))));
+  fillSel('f-funcao-tipo',  sorted(new Set(subPool.map(r=>r.funcao_tipo||''))));
+  fillSel('f-formulacao',   sorted(new Set(subPool.map(r=>r.formulacao||''))));
 }
 
 
@@ -505,7 +521,7 @@ function cbInit(id){
   CB[id]={options:[],selected:''};
   const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`),arrow=document.getElementById(`cb-${id}-arrow`),wrap=document.getElementById(`cb-${id}`);
   arrow.addEventListener('click',e=>{e.stopPropagation();const isOpen=wrap.classList.contains('open');closeAllCB();if(!isOpen){wrap.classList.add('open');cbRenderList(id,'');input.focus();}});
-  input.addEventListener('input',()=>{CB[id].selected='';clear.style.display=input.value?'block':'none';wrap.classList.add('open');cbRenderList(id,input.value);applyFilters();});
+  input.addEventListener('input',()=>{CB[id].selected='';clear.style.display=input.value?'block':'none';wrap.classList.add('open');cbRenderList(id,input.value);if(id==='titular'||id==='substancia')setTimeout(updateCascadeSelectsProd,0);applyFilters();});
   input.addEventListener('focus',()=>{if(!wrap.classList.contains('open')){wrap.classList.add('open');cbRenderList(id,input.value);}});
   clear.addEventListener('click',e=>{e.stopPropagation();cbSelect(id,'');wrap.classList.remove('open');applyFilters();});
   input.addEventListener('keydown',e=>{
@@ -527,7 +543,7 @@ function cbRenderList(id,query){
   list.innerHTML=html;
   list.querySelectorAll('.cb-opt').forEach(el=>el.addEventListener('mousedown',e=>{e.preventDefault();cbSelect(id,el.dataset.val);closeAllCB();applyFilters();}));
 }
-function cbSelect(id,val){if(!CB[id])return;CB[id].selected=val;const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`);input.value=val;clear.style.display=val?'block':'none';}
+function cbSelect(id,val){if(!CB[id])return;CB[id].selected=val;const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`);input.value=val;clear.style.display=val?'block':'none';if(id==='titular'||id==='substancia')setTimeout(updateCascadeSelectsProd,0);}
 function cbGetValue(id){const sel=CB[id]?.selected||'',typed=document.getElementById(`cb-${id}-input`)?.value?.trim()||'';return{exact:sel,text:sel||typed};}
 function closeAllCB(){document.querySelectorAll('.cb-wrap.open').forEach(w=>w.classList.remove('open'));}
 document.addEventListener('mousedown',e=>{if(!e.target.closest('.cb-wrap'))closeAllCB();});
@@ -571,7 +587,7 @@ function clearFilters(){
   document.getElementById('search').value='';
   ['f-funcao-tipo','f-formulacao','f-mpb','f-baixo','f-estado'].forEach(id=>document.getElementById(id).value='');
   cbSelect('titular','');cbSelect('substancia','');
-  SORT_COL=null;SORT_ASC=true;rebuildALL();buildSelects();applyFilters();
+  SORT_COL=null;SORT_ASC=true;rebuildALL();buildSelects();updateCascadeSelectsProd();applyFilters();
 }
 
 /* ══ RENDER ══ */

@@ -647,6 +647,23 @@ function renderPagination(total,pages){
 const pgBtn=i=>`<button class="pg-btn${i===PAGE?' active':''}" onclick="goPage(${i})">${i}</button>`;
 function goPage(n){const pages=PP?Math.ceil(FILT.length/PP):1;PAGE=Math.max(1,Math.min(n,pages));render();window.scrollTo({top:0,behavior:'smooth'});}
 
+/* Gera o link para a Ficha de Dados de Segurança (FDS) PT — nunca aponta para o Brasil,
+   porque a FDS segue o Regulamento (CE) 1907/2006 (REACH/CLP), diferente da FISPQ brasileira. */
+function fdsUrl(r){
+  const titular=(r.titular||'').toLowerCase();
+  const nome=encodeURIComponent((r.designacao||'').trim());
+  if(titular.includes('syngenta')){
+    // Syngenta PT tem uma página própria com todas as FDS em ordem alfabética
+    return 'https://www.syngenta.pt/fichas-de-seguranca';
+  }
+  if(titular.includes('bayer')){
+    // FDS da Bayer estão indexadas no domínio .pt da Bayer CropScience
+    return 'https://www.google.com/search?q=site:cropscience.bayer.pt+OR+site:cs-contentapi.bayer.com+'+nome+'+%22ficha+de+dados+de+seguran%C3%A7a%22';
+  }
+  // Fallback: pesquisa restrita a domínios .pt, excluindo resultados brasileiros (.com.br)
+  return 'https://www.google.com/search?q='+nome+'+%22ficha+de+dados+de+seguran%C3%A7a%22+site:.pt+-site:.com.br+-inurl:br';
+}
+
 /* ══ DETAIL ══ */
 function showDetail(idx){
   const r=FILT[idx];if(!r)return;
@@ -678,10 +695,15 @@ function showDetail(idx){
       <div class="dp-title">
         <h3>${titulo}</h3>
         ${estadoBadge}
-        <div style="margin-top:.5rem">
+        <div style="margin-top:.5rem;display:flex;flex-wrap:wrap;gap:.5rem">
           <a class="btn btn-ghost" style="text-decoration:none;display:inline-flex"
              href="usos.html?produto=${encodeURIComponent(r.designacao||'')}" target="_blank" rel="noopener">
             🌿 Ver Condições de Utilização
+          </a>
+          <a class="btn btn-ghost" style="text-decoration:none;display:inline-flex"
+             href="${fdsUrl(r)}" target="_blank" rel="noopener"
+             title="Pesquisa restrita a fontes portuguesas (PT) — nunca ao Brasil">
+            🧪 Ficha de Dados de Segurança (PT)
           </a>
         </div>
       </div>

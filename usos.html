@@ -16,7 +16,17 @@
   --sh:0 2px 16px rgba(0,0,0,.09);--sh2:0 8px 40px rgba(0,0,0,.16);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px;min-width:980px}
+
+/* BODY OTIMIZADO: sem min-width rígido para não ultrapassar a janela */
+body{
+  font-family:'Sora',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+  font-size:14px;
+  width:100%;
+  overflow-x:hidden;
+}
 
 /* HEADER */
 header{
@@ -58,7 +68,7 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 .fg select{padding:.5rem .65rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:.8rem;background:#fff;cursor:pointer;transition:border-color .2s;min-width:150px;max-width:240px}
 .fg select:focus{outline:none;border-color:var(--g3)}
 
-/* ── COMBOBOX (searchable dropdown) ── */
+/* COMBOBOX */
 .cb-wrap{position:relative;min-width:160px;max-width:240px}
 .cb-input-row{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;overflow:hidden}
 .cb-wrap.open .cb-input-row,
@@ -116,13 +126,22 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 .legend-item{font-weight:500;white-space:nowrap}
 .legend-sep{color:var(--border2)}
 
-/* STICKY FIX: sem overflow no table wrapper, min-width no body → sticky funciona */
-
-#table-wrap{padding:1rem 1.5rem 1.5rem}
+/* TABLE WRAPPER & TABLE: OTIMIZADOS PARA CONTAINER COM SCROLL PROPRIO */
+#table-wrap{
+  padding:1rem 1.5rem 1.5rem;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
 table{
-  width:100%;border-collapse:collapse;
-  background:#fff;font-size:.78rem;
-  border-radius:10px;box-shadow:var(--sh);
+  width:100%;
+  min-width:900px;
+  border-collapse:collapse;
+  background:#fff;
+  font-size:.78rem;
+  border-radius:10px;
+  box-shadow:var(--sh);
 }
 
 thead tr th:first-child{border-radius:10px 0 0 0}
@@ -156,7 +175,6 @@ tbody td{
 }
 tbody tr:last-child td{border-bottom:none}
 
-/* last row rounded corners */
 tbody tr:last-child td:first-child{border-radius:0 0 0 10px}
 tbody tr:last-child td:last-child{border-radius:0 0 10px 0}
 
@@ -368,7 +386,7 @@ const ESTADO_BY_LABEL = Object.fromEntries(ESTADOS.map(e=>[e.label,e]));
 /* ══════════════ STATE ══════════════ */
 let ALL=[], FILT=[], PAGE=1, PP=100;
 let SORT_COL=null, SORT_ASC=true;
-const DATASETS={};   // { AUT:[...], CAN:[...], ... }
+const DATASETS={};
 
 const DB_NAME='sifito_db3', DB_VER=1, STORE='records';
 
@@ -426,7 +444,6 @@ async function init(){
     if(found){ hideLoading(); showApp(); return; }
   }catch(e){ console.warn(e); }
 
-  // Sem cache — tenta carregar os JSON do servidor automaticamente (Netlify)
   showLoading('A carregar dados do servidor…');
   let loaded=0;
   for(const est of ESTADOS){
@@ -439,11 +456,10 @@ async function init(){
       DATASETS[est.key]=records;
       await dbSet('data_'+est.key,records);
       loaded++;
-    }catch(e){ /* ficheiro não disponível (local) — ignora */ }
+    }catch(e){ }
   }
   if(loaded>0){ hideLoading(); showApp(); return; }
 
-  // Nada funcionou — mostra ecrã de importação manual
   hideLoading();
   document.getElementById('import-screen').classList.add('active');
 }
@@ -458,7 +474,6 @@ dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remov
 fileInput.addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
 
 async function openUpdateUI(){
-  // Tenta refrescar do servidor primeiro (Netlify)
   showLoading('A verificar actualizações…');
   let updated=0;
   for(const est of ESTADOS){
@@ -478,7 +493,6 @@ async function openUpdateUI(){
     rebuildALL(); buildSelects(); updateHeaderMeta(); applyFilters();
     return;
   }
-  // Servidor não disponível — mostra importação manual
   hideLoading();
   document.getElementById('import-screen').classList.add('active');
   document.getElementById('toolbar').classList.remove('active');
@@ -517,12 +531,10 @@ async function handleFile(file){
       records=xlsxToRecords(ws);
     }
 
-    // Detectar a que dataset pertence pelo campo estado ou pelo nome do ficheiro
     let estadoKey = detectEstadoKey(file.name, records);
     pl.textContent=`A guardar ${records.length.toLocaleString('pt')} registos [${estadoKey}]…`;
     pf.style.width='85%';
 
-    // Garantir que todos os registos têm o campo estado correcto
     const est = ESTADO_BY_KEY[estadoKey];
     if(est) records.forEach(r=>{ if(!r.estado) r.estado=est.label; });
 
@@ -542,46 +554,19 @@ async function handleFile(file){
 }
 
 function detectEstadoKey(filename, records){
-  // 1. Pelo nome do ficheiro
   const fn = filename.toLowerCase();
   if(fn.includes('cancelad')&&fn.includes('vendautilizacaointerdita')) return 'CVUI';
   if(fn.includes('cancelad')&&fn.includes('vendainterditautilizacaopermitida')) return 'CVIP';
   if(fn.includes('cancelad')&&fn.includes('vendapermitida')) return 'CVP';
   if(fn.includes('cancelad')) return 'CAN';
   if(fn.includes('autorizad')||fn.includes('usos.json')||fn.includes('autorizadas')) return 'AUT';
-  // 2. Pelo campo estado no primeiro registo
   if(records.length && records[0].estado){
     const found = ESTADOS.find(e=>e.label===records[0].estado);
     if(found) return found.key;
   }
-  // 3. Default
   return 'AUT';
 }
 
-/*
-  SIFITO XLSX layout:
-    Row 0 = grupo (Finalidade / Produto fitofarmacêutico / Aplicação / Finalidade)
-    Row 1 = cabeçalhos das colunas
-    Row 2+ = dados
-
-  Colunas relevantes (índice 0-based):
-    0  Cultura
-    3  Situação Particular
-    4  Ar Livre / Protegida / Interior
-    5  Inimigo / Efeito a atingir
-    6  Nome Científico (do inimigo)
-    8  Uso Menor (UM)
-    12 Designação Comercial
-    14 Número (autorização)
-    15 Função
-    16 Substância(s) Ativa(s)
-    17 Época ou Estado Fenológico
-    18 Técnica e Equipamento
-    22 Dose (min-máx)
-    23 I. de Segurança/I. de Reentrada
-    24 Cond. e Restrições Específicas
-    26 Validade
-*/
 function xlsxToRecords(ws){
   const range=XLSX.utils.decode_range(ws['!ref']);
   const MAP={
@@ -624,14 +609,12 @@ function rebuildALL(){
 
 /* ══════════════ LAZY LOAD FROM NETWORK ══════════════ */
 async function loadDataset(key){
-  if(DATASETS[key]) return;   // já carregado
+  if(DATASETS[key]) return;
   const est = ESTADO_BY_KEY[key];
   showLoading(`A carregar ${est.label}…`);
   try{
-    // 1. Tenta cache
     const cached = await dbGet('data_'+key);
     if(cached && cached.length){ DATASETS[key]=cached; hideLoading(); return; }
-    // 2. Tenta fetch do ficheiro JSON do site
     const r = await fetch('./'+est.file);
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const json = await r.json();
@@ -668,7 +651,6 @@ function showApp(){
 function updateHeaderMeta(){
   const loaded = Object.keys(DATASETS);
   const total  = Object.values(DATASETS).reduce((s,d)=>s+d.length,0);
-  const dates  = loaded.map(k=>ESTADO_BY_KEY[k]?.label.split('—')[0].trim()).join(', ');
   document.getElementById('header-meta').textContent=
     `${total.toLocaleString('pt')} registos · ${loaded.length} tabela(s)`;
 }
@@ -686,10 +668,7 @@ function updateCascadeSelects(){
   const exactCult = cbGetValue('cultura').exact;
   const exactInim = cbGetValue('inimigo').exact;
 
-  // Cultura → pool para Inimigo
   const cultPool = exactCult ? ALL.filter(r=>r.cultura===exactCult) : ALL;
-
-  // Cultura + Inimigo → pool para Nome Científico e Função
   const inimPool = exactInim ? cultPool.filter(r=>r.inimigo===exactInim) : cultPool;
 
   const sorted=(set)=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
@@ -710,13 +689,7 @@ function fillSel(id, values){
   if(cur) sel.value=cur;
 }
 
-/* ══════════════ COMBOBOX ENGINE ══════════════
-   Comportamento:
-   • Escrever  → filtra a tabela por partial match imediatamente
-   • Seleccionar opção → filtra por match exacto
-   • ✕  → limpa tudo
-   • Blur → mantém texto e filtro
-══════════════════════════════════════════════ */
+/* ══════════════ COMBOBOX ENGINE ══════════════ */
 const CB = {};
 
 function cbInit(id){
@@ -726,7 +699,6 @@ function cbInit(id){
   const arrow = document.getElementById(`cb-${id}-arrow`);
   const wrap  = document.getElementById(`cb-${id}`);
 
-  // Abrir/fechar com a seta
   arrow.addEventListener('click', e => {
     e.stopPropagation();
     const isOpen = wrap.classList.contains('open');
@@ -734,18 +706,15 @@ function cbInit(id){
     if(!isOpen){ wrap.classList.add('open'); cbRenderList(id,''); input.focus(); }
   });
 
-  // Escrever → filtra dropdown E tabela em simultâneo
   input.addEventListener('input', () => {
-    CB[id].selected = ''; // limpa selecção exacta ao escrever
+    CB[id].selected = '';
     clear.style.display = input.value ? 'block' : 'none';
     wrap.classList.add('open');
     cbRenderList(id, input.value);
-    // Cultura ou Inimigo → re-cascata ao escrever
     if(id === 'cultura' || id === 'inimigo') setTimeout(updateCascadeSelects, 0);
-    applyFilters(); // ← aplica partial match imediatamente
+    applyFilters();
   });
 
-  // Focar abre dropdown
   input.addEventListener('focus', () => {
     if(!wrap.classList.contains('open')){
       wrap.classList.add('open');
@@ -753,7 +722,6 @@ function cbInit(id){
     }
   });
 
-  // Limpar
   clear.addEventListener('click', e => {
     e.stopPropagation();
     cbSelect(id, '');
@@ -761,7 +729,6 @@ function cbInit(id){
     applyFilters();
   });
 
-  // Navegação por teclado
   input.addEventListener('keydown', e => {
     const list  = document.getElementById(`cb-${id}-list`);
     const items = [...list.querySelectorAll('.cb-opt')];
@@ -769,7 +736,7 @@ function cbInit(id){
     if(e.key==='Escape'){ closeAllComboboxes(); input.blur(); }
     if(e.key==='Enter'){
       if(cur){ cbSelect(id, cur.dataset.val); closeAllComboboxes(); applyFilters(); }
-      else { closeAllComboboxes(); } // confirma texto digitado como filtro
+      else { closeAllComboboxes(); }
     }
     if(e.key==='ArrowDown'){
       e.preventDefault();
@@ -807,7 +774,6 @@ function cbRenderList(id, query){
     html += `<div class="cb-empty">Sem resultados para "${esc(query)}"</div>`;
   } else {
     html += shown.map(o=>{
-      // Bold the matching part
       let label = esc(o);
       if(q){
         const idx = o.toLowerCase().indexOf(q);
@@ -839,11 +805,9 @@ function cbSelect(id, val){
   const clear = document.getElementById(`cb-${id}-clear`);
   input.value  = val;
   clear.style.display = val ? 'block' : 'none';
-  // Cultura ou Inimigo mudaram — actualiza cascata
   if(id === 'cultura' || id === 'inimigo') setTimeout(updateCascadeSelects, 0);
 }
 
-// Retorna o valor para filtrar: selecção exacta ou texto digitado
 function cbGetValue(id){
   const sel  = CB[id]?.selected || '';
   const typed = document.getElementById(`cb-${id}-input`)?.value?.trim() || '';
@@ -908,15 +872,6 @@ function setSort(col){
   applyFilters();
 }
 
-function clearFilters(){
-  document.getElementById('search').value='';
-  document.getElementById('f-funcao').value='';
-  cbSelect('cultura',''); cbSelect('inimigo',''); cbSelect('nomc','');
-  SORT_COL=null; SORT_ASC=true;
-  updateCascadeSelects();
-  applyFilters();
-}
-
 /* ══════════════ RENDER ══════════════ */
 function render(){
   const total=FILT.length;
@@ -936,7 +891,6 @@ function render(){
     document.getElementById('pagination').innerHTML=''; return;
   }
 
-  // Header
   const thdr=COLS.map(c=>{
     const act=SORT_COL===c.key;
     const ic=act?(SORT_ASC?'▲':'▼'):'⇅';
@@ -944,7 +898,6 @@ function render(){
       style="min-width:${c.w}">${esc(c.label)}<span class="sort-ic">${ic}</span></th>`;
   }).join('')+`<th style="width:52px;text-align:center" title="Ver ficha completa do registo">Detalhe</th>`;
 
-  // Body
   const tbody=slice.map((r,i)=>{
     const idx=(PAGE-1)*(PP||0)+i;
     return `<tr>
@@ -1040,7 +993,6 @@ function showDetail(idx){
   const parts=[r.produto, r.numero?'Nº '+r.numero:null, r.autorizacao].filter(Boolean);
   const titulo=parts.map(p=>esc(p)).join(' · ');
 
-  // Badge de estado no cabeçalho
   const est = ESTADO_BY_LABEL[r.estado];
   const estadoBadge = est
     ? `<span style="font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:5px;background:${est.bg};color:${est.color}">${est.icon} ${esc(est.label)}</span>`
@@ -1111,13 +1063,11 @@ document.getElementById('search').addEventListener('input',()=>{
 document.getElementById('f-funcao').addEventListener('change',()=>{PAGE=1;applyFilters();});
 document.getElementById('f-pp').addEventListener('change',()=>{PAGE=1;applyFilters();});
 
-// Estado — carrega dataset se ainda não estiver em memória
 document.getElementById('f-estado').addEventListener('change', async ()=>{
   const key = document.getElementById('f-estado').value;
   if(key && !DATASETS[key]){
     await loadDataset(key);
   }
-  // Se "Todas", garante que todos os datasets estão carregados
   if(!key){
     for(const est of ESTADOS){
       if(!DATASETS[est.key]) await loadDataset(est.key);

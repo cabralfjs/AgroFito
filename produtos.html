@@ -335,9 +335,13 @@ async function init(){
 function checkURLParams(){
   const params = new URLSearchParams(window.location.search);
   const num = params.get('numero');
+  const autoOpen = params.get('abrir') === '1';
   if(num){
     document.getElementById('search').value = num;
     applyFilters();
+    if(autoOpen && FILT.length > 0){
+      showDetail(0);
+    }
   }
 }
 
@@ -707,7 +711,7 @@ function showDetail(idx){
   }
 
   const linkUsosBtn = r.numero 
-    ? `<a href="usos.html?numero=${encodeURIComponent(r.numero)}" target="_blank" class="btn-usos">🌾 Ver Usos e Condições Autorizadas</a>` 
+    ? `<a href="usos.html?numero=${encodeURIComponent(r.numero)}&abrir=1" target="_blank" class="btn-usos">🌾 Ver Usos e Condições Autorizadas</a>` 
     : '';
 
   document.getElementById('detail-panel').innerHTML=`

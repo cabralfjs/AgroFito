@@ -43,6 +43,8 @@ header h1{font-size:.88rem;font-weight:700;flex:1;letter-spacing:-.01em}
 .fg select:focus{outline:none;border-color:var(--g3)}
 .btn{padding:.52rem 1rem;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:.35rem;white-space:nowrap}
 .btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--border)}.btn-ghost:hover{border-color:var(--g3);color:var(--g3)}
+.btn-usos{background:var(--g3);color:#fff;border:none;border-radius:8px;padding:.5rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;transition:background .2s}
+.btn-usos:hover{background:var(--g1)}
 /* COMBOBOX */
 .cb-wrap{position:relative;min-width:160px;max-width:220px}
 .cb-input-row{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:8px;background:#fff;transition:border-color .2s;overflow:hidden}
@@ -131,6 +133,7 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
 .dp-obs-item{margin-bottom:.75rem}
 .dp-obs-item label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:.2rem}
 .dp-obs-item p{font-size:.82rem;color:var(--ink);line-height:1.55}
+.dp-actions{margin-top:1.2rem;display:flex;gap:.75rem;align-items:center;justify-content:flex-start}
 /* LOADING */
 #loading-overlay{display:none;position:fixed;inset:0;background:rgba(244,240,232,.85);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
 #loading-overlay.active{display:flex}
@@ -268,7 +271,7 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
 /* ══ ESTADOS ══ */
 const ESTADOS=[
   {key:'AUT', label:'Autorizada',                                    file:'prod_autorizadas.json',                                       color:'#1a5c35',bg:'#e6f2da',icon:'✅'},
-  {key:'CVP', label:'Cancelada — Venda Permitida',                   file:'prod_canceladas_venda_permitida.json',                        color:'#904d00',bg:'#fff3e0',icon:'🟡'},
+  {key:'CVP', label:'Cancelada — Venda Permitida', me: 'CVP',        file:'prod_canceladas_venda_permitida.json',                        color:'#904d00',bg:'#fff3e0',icon:'🟡'},
   {key:'CVIP',label:'Cancelada — Venda Interdita / Util. Permitida', file:'prod_canceladas_venda_interdita_util_permitida.json',         color:'#5a2d82',bg:'#f3e8ff',icon:'🟠'},
   {key:'CVUI',label:'Cancelada — Venda e Util. Interditas',          file:'prod_canceladas_venda_util_interditas.json',                  color:'#333',   bg:'#e8e8e8',icon:'⚫'},
 ];
@@ -306,10 +309,9 @@ async function init(){
       const c=await dbGet('data_'+est.key);
       if(c&&c.length){DATASETS[est.key]=c;found=true;}
     }
-    if(found){ hideLoading(); showApp(); return; }
+    if(found){ hideLoading(); showApp(); checkURLParams(); return; }
   }catch(e){ console.warn(e); }
 
-  // Sem cache — tenta carregar os JSON do servidor automaticamente (Netlify)
   showLoading('A carregar dados do servidor…');
   let loaded=0;
   for(const est of ESTADOS){
@@ -322,13 +324,21 @@ async function init(){
       DATASETS[est.key]=records;
       await dbSet('data_'+est.key,records);
       loaded++;
-    }catch(e){ /* ficheiro não disponível (local) — ignora */ }
+    }catch(e){}
   }
-  if(loaded>0){ hideLoading(); showApp(); return; }
+  if(loaded>0){ hideLoading(); showApp(); checkURLParams(); return; }
 
-  // Nada funcionou — mostra ecrã de importação manual
   hideLoading();
   document.getElementById('import-screen').classList.add('active');
+}
+
+function checkURLParams(){
+  const params = new URLSearchParams(window.location.search);
+  const num = params.get('numero');
+  if(num){
+    document.getElementById('search').value = num;
+    applyFilters();
+  }
 }
 
 /* ══ FILE IMPORT ══ */
@@ -340,7 +350,6 @@ dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remov
 fileInput.addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
 
 async function openUpdateUI(){
-  // Tenta refrescar do servidor primeiro (Netlify)
   showLoading('A verificar actualizações…');
   let updated=0;
   for(const est of ESTADOS){
@@ -360,7 +369,6 @@ async function openUpdateUI(){
     rebuildALL(); buildSelects(); updateHeaderMeta(); applyFilters();
     return;
   }
-  // Servidor não disponível — mostra importação manual
   hideLoading();
   document.getElementById('import-screen').classList.add('active');
   document.getElementById('toolbar').classList.remove('active');
@@ -414,13 +422,21 @@ function detectEstadoKey(filename,records){
 
 /* ══ XLSX → RECORDS ══ */
 const FUNC_TYPES=['Fungicida','Inseticida','Herbicida','Acaricida','Moluscicida','Nematodicida','Rodenticida','Fumigante','Regulador','Adjuvante','Feromona','Bactericida','Algicida','Desinfestante','Repelente'];
-function extractFuncaoTipo(s){const up=(s||'').toUpperCase();for(const t of FUNC_TYPES){if(up.includes(t.toUpperCase()))return t;}return s?s.split(' ')[0].slice(0,25):'';}
+const FUNC_REGEXES = FUNC_TYPES.map(t => ({ name: t, regex: new RegExp(t, 'i') }));
+
+function extractFuncaoTipo(s){
+  if(!s) return '';
+  for(const item of FUNC_REGEXES){
+    if(item.regex.test(s)) return item.name;
+  }
+  return s.split(' ')[0].slice(0,25);
+}
 
 function xlsxToRecords(ws){
   const range=XLSX.utils.decode_range(ws['!ref']);
   const MAP={0:'designacao',1:'autorizacao',2:'numero',3:'titular',4:'tipo_util',5:'substancia',6:'teor',7:'percentagem',8:'formulacao',10:'classificacao',11:'frases',12:'baixo_risco',13:'cand_subs',14:'mpb',15:'data_autorizacao'};
   const records=[];
-  for(let r=1;r<=range.e.r;r++){  // linha 0=header, dados de 1 em diante
+  for(let r=1;r<=range.e.r;r++){
     const obj={};
     for(const[ci,key] of Object.entries(MAP)){
       const cell=ws[XLSX.utils.encode_cell({r,c:parseInt(ci)})];
@@ -486,28 +502,33 @@ function updateHeaderMeta(){
 /* ══ BUILD SELECTS ══ */
 function buildSelects(){
   const sorted=set=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
-  // Titular é sempre construído a partir de ALL
   cbPopulate('titular', sorted(new Set(ALL.map(r=>r.titular||''))));
-  // O resto em cascata
+  cbPopulate('substancia', sorted(new Set(ALL.map(r=>r.substancia||''))));
   updateCascadeSelectsProd();
 }
 
-function updateCascadeSelectsProd(){
+function updateCascadeSelectsProd(triggerId){
   const exactTit = cbGetValue('titular').exact;
   const exactSub = cbGetValue('substancia').exact;
-
-  // Titular → filtra Substância
-  const titPool = exactTit ? ALL.filter(r=>r.titular===exactTit) : ALL;
-
-  // Titular + Substância → filtra Formulação e Função Tipo
-  const subPool = exactSub ? titPool.filter(r=>r.substancia===exactSub) : titPool;
-
   const sorted=set=>[...set].filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt'));
-  cbPopulate('substancia',  sorted(new Set(titPool.map(r=>r.substancia||''))));
-  fillSel('f-funcao-tipo',  sorted(new Set(subPool.map(r=>r.funcao_tipo||''))));
-  fillSel('f-formulacao',   sorted(new Set(subPool.map(r=>r.formulacao||''))));
-}
 
+  let pool = ALL;
+  if (exactTit) pool = pool.filter(r => r.titular === exactTit);
+  if (exactSub) pool = pool.filter(r => r.substancia === exactSub);
+
+  if (triggerId !== 'substancia') {
+    const subPool = exactTit ? ALL.filter(r => r.titular === exactTit) : ALL;
+    cbPopulate('substancia', sorted(new Set(subPool.map(r => r.substancia || ''))));
+  }
+  
+  if (triggerId !== 'titular') {
+    const titPool = exactSub ? ALL.filter(r => r.substancia === exactSub) : ALL;
+    cbPopulate('titular', sorted(new Set(titPool.map(r => r.titular || ''))));
+  }
+
+  fillSel('f-funcao-tipo', sorted(new Set(pool.map(r => r.funcao_tipo || ''))));
+  fillSel('f-formulacao',  sorted(new Set(pool.map(r => r.formulacao || ''))));
+}
 
 function fillSel(id,values){
   const sel=document.getElementById(id);const cur=sel.value;
@@ -521,7 +542,14 @@ function cbInit(id){
   CB[id]={options:[],selected:''};
   const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`),arrow=document.getElementById(`cb-${id}-arrow`),wrap=document.getElementById(`cb-${id}`);
   arrow.addEventListener('click',e=>{e.stopPropagation();const isOpen=wrap.classList.contains('open');closeAllCB();if(!isOpen){wrap.classList.add('open');cbRenderList(id,'');input.focus();}});
-  input.addEventListener('input',()=>{CB[id].selected='';clear.style.display=input.value?'block':'none';wrap.classList.add('open');cbRenderList(id,input.value);if(id==='titular'||id==='substancia')setTimeout(updateCascadeSelectsProd,0);applyFilters();});
+  input.addEventListener('input',()=>{
+    CB[id].selected='';
+    clear.style.display=input.value?'block':'none';
+    wrap.classList.add('open');
+    cbRenderList(id,input.value);
+    if(id==='titular'||id==='substancia') setTimeout(()=>updateCascadeSelectsProd(id),0);
+    applyFilters();
+  });
   input.addEventListener('focus',()=>{if(!wrap.classList.contains('open')){wrap.classList.add('open');cbRenderList(id,input.value);}});
   clear.addEventListener('click',e=>{e.stopPropagation();cbSelect(id,'');wrap.classList.remove('open');applyFilters();});
   input.addEventListener('keydown',e=>{
@@ -543,7 +571,14 @@ function cbRenderList(id,query){
   list.innerHTML=html;
   list.querySelectorAll('.cb-opt').forEach(el=>el.addEventListener('mousedown',e=>{e.preventDefault();cbSelect(id,el.dataset.val);closeAllCB();applyFilters();}));
 }
-function cbSelect(id,val){if(!CB[id])return;CB[id].selected=val;const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`);input.value=val;clear.style.display=val?'block':'none';if(id==='titular'||id==='substancia')setTimeout(updateCascadeSelectsProd,0);}
+function cbSelect(id,val){
+  if(!CB[id])return;
+  CB[id].selected=val;
+  const input=document.getElementById(`cb-${id}-input`),clear=document.getElementById(`cb-${id}-clear`);
+  input.value=val;
+  clear.style.display=val?'block':'none';
+  if(id==='titular'||id==='substancia') setTimeout(()=>updateCascadeSelectsProd(id),0);
+}
 function cbGetValue(id){const sel=CB[id]?.selected||'',typed=document.getElementById(`cb-${id}-input`)?.value?.trim()||'';return{exact:sel,text:sel||typed};}
 function closeAllCB(){document.querySelectorAll('.cb-wrap.open').forEach(w=>w.classList.remove('open'));}
 document.addEventListener('mousedown',e=>{if(!e.target.closest('.cb-wrap'))closeAllCB();});
@@ -655,14 +690,12 @@ function showDetail(idx){
   const estadoBadge=est?`<span style="font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:5px;background:${est.bg};color:${est.color};display:inline-block;margin-bottom:.5rem">${est.icon} ${esc(est.label)}</span>`:'';
   const titulo=[r.designacao,r.numero?'Nº '+r.numero:null,r.autorizacao].filter(Boolean).map(p=>esc(p)).join(' · ');
 
-  // GHS tags
   let ghsHtml='<span class="dash">—</span>';
   if(r.classificacao&&r.classificacao!=='-'){
     const items=r.classificacao.split(';').map(s=>s.trim()).filter(s=>s&&s!=='-');
     if(items.length){ghsHtml=items.map(item=>{let cls='tag-gray';const up=item.toUpperCase();if(up.startsWith('GHS'))cls='tag-gray';else if(up.includes('CARC')||up.includes('REPR')||up.includes('MUTA'))cls='tag-red';else if(up.includes('AQUAT')||up.includes('CHRONIC'))cls='tag-blue';else if(up.includes('TOX'))cls='tag-red';else if(up.includes('IRRIT')||up.includes('HARM'))cls='tag-amber';return `<span class="tag ${cls}" style="font-size:.7rem">${esc(item)}</span>`;}).join(' ');}
   }
 
-  // Frases H/P
   let frasesHtml='';
   if(r.frases&&r.frases!=='-'){
     const all=r.frases.split(';').map(s=>s.trim()).filter(s=>s&&s!=='-');
@@ -672,6 +705,10 @@ function showDetail(idx){
     if(pf.length)frasesHtml+=`<p style="margin-top:.4rem"><strong>Frases P (precaução)</strong><br>${pf.map(s=>esc(s)).join(' &nbsp; ')}</p>`;
     if(sp.length)frasesHtml+=`<p style="margin-top:.4rem"><strong>Frases SP</strong><br>${sp.map(s=>esc(s)).join(' &nbsp; ')}</p>`;
   }
+
+  const linkUsosBtn = r.numero 
+    ? `<a href="usos.html?numero=${encodeURIComponent(r.numero)}" target="_blank" class="btn-usos">🌾 Ver Usos e Condições Autorizadas</a>` 
+    : '';
 
   document.getElementById('detail-panel').innerHTML=`
     <div class="dp-header">
@@ -702,6 +739,7 @@ function showDetail(idx){
     ${r.funcao_curta?`<hr class="dp-sep"><div class="dp-obs-section"><div class="dp-obs-item"><label>Função</label><p>${esc(r.funcao_curta)}</p></div>${r.funcao_mecanismo?`<div class="dp-obs-item"><label>Mecanismo de Acção</label><p>${esc(r.funcao_mecanismo)}</p></div>`:''}
     </div>`:''}
     ${frasesHtml?`<hr class="dp-sep"><div class="dp-obs-section"><div class="dp-obs-item"><label>Frases de Segurança</label><div class="dp-frases">${frasesHtml}</div></div></div>`:''}
+    ${linkUsosBtn?`<hr class="dp-sep"><div class="dp-actions">${linkUsosBtn}</div>`:''}
   `;
   document.getElementById('detail-overlay').classList.add('open');
 }

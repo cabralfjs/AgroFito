@@ -647,22 +647,15 @@ function renderPagination(total,pages){
 const pgBtn=i=>`<button class="pg-btn${i===PAGE?' active':''}" onclick="goPage(${i})">${i}</button>`;
 function goPage(n){const pages=PP?Math.ceil(FILT.length/PP):1;PAGE=Math.max(1,Math.min(n,pages));render();window.scrollTo({top:0,behavior:'smooth'});}
 
-/* Gera o link para a Ficha de Dados de Segurança (FDS) PT — nunca aponta para o Brasil,
-   porque a FDS segue o Regulamento (CE) 1907/2006 (REACH/CLP), diferente da FISPQ brasileira.
-   Pesquisa pelo nome do produto + nº de registo (ex.: "SPINTOR 0288") para maior precisão. */
+/* Gera o link para a página externa do produto — pesquisa pelo nome exato do produto
+   (entre aspas) + nº de registo/autorização (ex.: "SPINTOR" 0288), sem restringir a
+   nenhum domínio específico (muitos fabricantes não têm sequer um domínio .pt próprio,
+   usam antes algo como corteva.com/pt). Exclui sempre resultados brasileiros. */
 function fdsUrl(r){
-  const titular=(r.titular||'').toLowerCase();
-  const termo=encodeURIComponent([r.designacao,r.numero].filter(Boolean).join(' ').trim());
-  if(titular.includes('syngenta')){
-    // Syngenta PT tem uma página própria com todas as FDS em ordem alfabética
-    return 'https://www.syngenta.pt/fichas-de-seguranca';
-  }
-  if(titular.includes('bayer')){
-    // FDS da Bayer estão indexadas no domínio .pt da Bayer CropScience
-    return 'https://www.google.com/search?q=site:cropscience.bayer.pt+OR+site:cs-contentapi.bayer.com+'+termo+'+%22ficha+de+dados+de+seguran%C3%A7a%22';
-  }
-  // Fallback: pesquisa restrita a domínios .pt, excluindo resultados brasileiros (.com.br)
-  return 'https://www.google.com/search?q='+termo+'+%22ficha+de+dados+de+seguran%C3%A7a%22+site:.pt+-site:.com.br+-inurl:br';
+  const nome=(r.designacao||'').trim();
+  const numero=(r.numero||'').trim();
+  const termo=encodeURIComponent('"'+nome+'"'+(numero?' '+numero:''));
+  return 'https://www.google.com/search?q='+termo+'+-site:.com.br+-inurl:pt-br+-inurl:brasil';
 }
 
 /* ══ DETAIL ══ */

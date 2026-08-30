@@ -174,6 +174,12 @@ tbody tr:last-child td:last-child{border-radius:0 0 10px 0}
 .dash{color:var(--border2)}
 .italic{font-style:italic;color:var(--muted)}
 
+/* COLUNA "DETALHE" fixa à direita do ecrã, sempre visível mesmo com scroll horizontal */
+th.col-detail{position:sticky;right:0;z-index:21;box-shadow:-4px 0 6px -4px rgba(0,0,0,.25)}
+td.col-detail{position:sticky;right:0;z-index:10;background:#fff;box-shadow:-4px 0 6px -4px rgba(0,0,0,.15)}
+tbody tr:nth-child(even) td.col-detail{background:#fafef7}
+tbody tr:hover td.col-detail{background:#eef7e6}
+
 /* PAGINATION */
 #pagination{display:flex;align-items:center;justify-content:center;gap:.4rem;padding:1rem 1.5rem;flex-wrap:wrap}
 .pg-btn{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-family:'IBM Plex Mono',monospace;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
@@ -946,7 +952,7 @@ function render(){
     const ic=act?(SORT_ASC?'▲':'▼'):'⇅';
     return `<th onclick="setSort('${c.key}')" class="${act?'sorted':''}"
       style="min-width:${c.w}">${esc(c.label)}<span class="sort-ic">${ic}</span></th>`;
-  }).join('')+`<th style="width:52px;text-align:center" title="Ver ficha completa do registo">Detalhe</th>`;
+  }).join('')+`<th class="col-detail" style="width:52px;text-align:center" title="Ver ficha completa do registo">Detalhe</th>`;
 
   // Body
   const tbody=slice.map((r,i)=>{
@@ -963,7 +969,7 @@ function render(){
       <td><span class="mono">${esc(r.numero||'—')}</span></td>
       <td>${validTag(r.validade)}</td>
       <td style="font-size:.72rem">${esc(r.dose||'—')}</td>
-      <td style="text-align:center">
+      <td class="col-detail" style="text-align:center">
         <button class="btn-detail" onclick="showDetail(${idx})" title="Ver ficha completa">
           <span class="btn-detail-icon">📋</span>
         </button>

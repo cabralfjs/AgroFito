@@ -678,6 +678,12 @@ function showDetail(idx){
       <div class="dp-title">
         <h3>${titulo}</h3>
         ${estadoBadge}
+        <div style="margin-top:.5rem">
+          <a class="btn btn-ghost" style="text-decoration:none;display:inline-flex"
+             href="usos.html?produto=${encodeURIComponent(r.designacao||'')}" target="_blank" rel="noopener">
+            🌿 Ver Condições de Utilização
+          </a>
+        </div>
       </div>
       <button class="dp-close" onclick="document.getElementById('detail-overlay').classList.remove('open')">✕</button>
     </div>

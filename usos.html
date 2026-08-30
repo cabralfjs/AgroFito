@@ -673,6 +673,17 @@ function showApp(){
     document.documentElement.style.setProperty('--sticky-top',(hh+th)+'px');
   });
   applyFilters();
+  applyProdutoFromURL();
+}
+
+/* Vindo de produtos.html com ?produto=NOME — pré-preenche a pesquisa com o produto */
+function applyProdutoFromURL(){
+  const params=new URLSearchParams(window.location.search);
+  const produto=params.get('produto');
+  if(!produto) return;
+  document.getElementById('search').value=produto;
+  PAGE=1;
+  applyFilters();
 }
 
 function updateHeaderMeta(){

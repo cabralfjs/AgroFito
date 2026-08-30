@@ -22,7 +22,7 @@ body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-
 header{
   background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 100%);
   color:#fff;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;
-  height:58px;position:sticky;top:0;z-index:300;box-shadow:0 2px 20px rgba(0,0,0,.25)
+  height:58px;position:sticky;top:0;left:0;z-index:300;box-shadow:0 2px 20px rgba(0,0,0,.25)
 }
 .logo{background:var(--lime);color:var(--g1);font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.7rem;padding:3px 9px;border-radius:4px;letter-spacing:.06em;white-space:nowrap}
 header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
@@ -47,7 +47,7 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 .progress-label{font-size:.75rem;color:var(--muted);margin-top:.4rem;font-family:'IBM Plex Mono',monospace}
 
 /* TOOLBAR */
-#toolbar{background:var(--paper);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:none;flex-wrap:wrap;gap:.6rem;align-items:flex-end;position:sticky;top:58px;z-index:200}
+#toolbar{background:var(--paper);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:none;flex-wrap:wrap;gap:.6rem;align-items:flex-end;position:sticky;top:58px;left:0;z-index:200}
 #toolbar.active{display:flex}
 .search-wrap{flex:1;min-width:220px;position:relative}
 .search-wrap input{width:100%;padding:.55rem .8rem .55rem 2.3rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:.83rem;background:#fff;transition:border-color .2s;color:var(--ink)}
@@ -102,7 +102,7 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 .btn-detail-icon{font-size:.95rem;line-height:1;pointer-events:none}
 
 /* STATS BAR */
-#stats-bar{display:none;flex-wrap:wrap;gap:.75rem;padding:.5rem 1.5rem;background:var(--cream);border-bottom:1px solid var(--border);font-size:.76rem;color:var(--muted);align-items:center}
+#stats-bar{display:none;flex-wrap:wrap;gap:.75rem;padding:.5rem 1.5rem;background:var(--cream);border-bottom:1px solid var(--border);font-size:.76rem;color:var(--muted);align-items:center;position:sticky;left:0}
 #stats-bar.active{display:flex}
 .pill{background:var(--tag-bg);color:var(--tag-fg);padding:2px 9px;border-radius:20px;font-weight:700;font-family:'IBM Plex Mono',monospace;font-size:.72rem}
 .pill-gray{background:#eee;color:var(--muted)}
@@ -110,16 +110,19 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
   display:none;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;
   padding:.45rem 1.5rem;background:#fff;
   border-bottom:1px solid var(--border);font-size:.74rem;
+  position:sticky;left:0;
 }
 #legend-bar.active{display:flex}
 .legend-title{font-weight:700;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em}
 .legend-item{font-weight:500;white-space:nowrap}
 .legend-sep{color:var(--border2)}
 
-/* STICKY FIX: overflow-x no wrapper (sem altura fixa, sem overflow-y) mantém o thead sticky
-   a funcionar com o scroll normal da página, e limita o scroll horizontal só à tabela. */
+/* STICKY FIX: sem overflow no table-wrap (para não criar um "scroll container" que
+   estragaria a referência do thead sticky). O scroll horizontal passa a ser o da
+   própria página; o cabeçalho/toolbar/stats/legenda ficam "sticky left:0" para se
+   manterem sempre visíveis mesmo quando se faz scroll horizontal para ver a tabela. */
 
-#table-wrap{padding:1rem 1.5rem 1.5rem;overflow-x:auto}
+#table-wrap{padding:1rem 1.5rem 1.5rem}
 table{
   width:100%;min-width:1180px;border-collapse:collapse;
   background:#fff;font-size:.78rem;

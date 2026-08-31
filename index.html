@@ -36,11 +36,10 @@
 }
 </script>
 
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--g1:#0f3d22;--g2:#1a5c35;--g3:#2d7a4f;--lime:#7cb83a;--lime2:#c5e89a;--cream:#f4f0e8;--paper:#fdfaf4;--ink:#18180f;--muted:#6b6b5a;--border:#d6d0c4;--tag-bg:#e6f2da;--tag-fg:#1a5c35}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sora',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
 header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 100%);padding:.75rem 2rem;display:flex;align-items:center;gap:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.25)}
 .logo-svg{width:38px;height:38px;flex-shrink:0}
 .logo-text h1{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
@@ -58,7 +57,7 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 .module-card h3{font-size:1rem;font-weight:700;color:var(--g2)}
 .module-card p{font-size:.8rem;color:var(--muted);line-height:1.5;flex:1}
 .module-stats{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.1rem}
-.stat-tag{background:var(--tag-bg);color:var(--tag-fg);font-size:.68rem;font-weight:600;padding:2px 7px;border-radius:10px;font-family:'IBM Plex Mono',monospace}
+.stat-tag{background:var(--tag-bg);color:var(--tag-fg);font-size:.68rem;font-weight:600;padding:2px 7px;border-radius:10px;font-family:ui-monospace,SFMono-Regular,'Cascadia Code','Roboto Mono',Consolas,monospace}
 .module-cta{display:inline-flex;align-items:center;gap:.5rem;background:var(--g2);color:#fff;border-radius:7px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;transition:background .15s;margin-top:.25rem}
 .module-cta:hover{background:var(--g3)}
 .arrow{transition:transform .15s}
@@ -137,6 +136,9 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
   </p>
   <p style="margin-top:.3rem;opacity:.6;font-size:.7rem">
     © 2026 Francisco Cabral &nbsp;·&nbsp; V1.2 &nbsp;·&nbsp; Todos os direitos reservados.
+  </p>
+  <p style="margin-top:.5rem;opacity:.55;font-size:.68rem">
+    <strong>Privacidade:</strong> este site não recolhe nem envia dados pessoais para nenhum servidor. Os ficheiros que importa nas ferramentas de consulta ficam guardados apenas no seu próprio navegador (armazenamento local do browser) e nunca são partilhados.
   </p>
 </div>
 

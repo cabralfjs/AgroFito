@@ -221,6 +221,9 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
   .fg select{min-width:120px;max-width:180px}
   #detail-panel{max-height:90vh}
   .dp-grid{grid-template-columns:1fr}
+  /* Em mobile a toolbar deixa de ficar fixa — senão ocupa o ecrã quase todo
+     e sobra pouquíssimo espaço para ver a tabela. Só o cabeçalho fica sticky. */
+  #toolbar, #stats-bar, #legend-bar{position:static;left:auto}
   /* Modo compacto: mantém só Estado, Cultura, Produto, Dose e Detalhe visíveis;
      o resto continua acessível no painel de Detalhe (📋) */
   table th:nth-child(3), table td:nth-child(3),
@@ -669,6 +672,13 @@ async function loadDataset(key){
 }
 
 /* ══════════════ SHOW APP ══════════════ */
+function updateStickyTop(){
+  const hh=document.querySelector('header').offsetHeight;
+  const isMobile=window.matchMedia('(max-width:700px)').matches;
+  const th=isMobile?0:document.getElementById('toolbar').offsetHeight;
+  document.documentElement.style.setProperty('--sticky-top',(hh+th)+'px');
+}
+
 function showApp(){
   document.getElementById('import-screen').classList.remove('active');
   rebuildALL();
@@ -677,11 +687,8 @@ function showApp(){
   document.getElementById('toolbar').classList.add('active');
   document.getElementById('stats-bar').classList.add('active');
   document.getElementById('legend-bar').classList.add('active');
-  requestAnimationFrame(()=>{
-    const hh=document.querySelector('header').offsetHeight;
-    const th=document.getElementById('toolbar').offsetHeight;
-    document.documentElement.style.setProperty('--sticky-top',(hh+th)+'px');
-  });
+  requestAnimationFrame(updateStickyTop);
+  window.addEventListener('resize',updateStickyTop);
   applyFilters();
   applyProdutoFromURL();
 }

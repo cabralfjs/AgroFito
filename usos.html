@@ -224,6 +224,7 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
   /* Em mobile a toolbar deixa de ficar fixa — senão ocupa o ecrã quase todo
      e sobra pouquíssimo espaço para ver a tabela. Só o cabeçalho fica sticky. */
   #toolbar, #stats-bar, #legend-bar{position:static;left:auto}
+  #table-wrap{overflow-x:hidden;padding:.5rem .6rem 1rem}
   /* Modo compacto: mantém só Estado, Cultura, Produto, Dose e Detalhe visíveis;
      o resto continua acessível no painel de Detalhe (📋) */
   table th:nth-child(3), table td:nth-child(3),
@@ -232,8 +233,19 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
   table th:nth-child(7), table td:nth-child(7),
   table th:nth-child(8), table td:nth-child(8),
   table th:nth-child(9), table td:nth-child(9){display:none}
-  table{min-width:0}
-  #table-wrap{padding:.5rem .6rem 1rem}
+  /* Tabela nunca excede a largura do ecrã: layout fixo, colunas proporcionais,
+     texto quebra em vez de forçar scroll horizontal */
+  table{table-layout:fixed;width:100%!important;min-width:0!important}
+  thead th, tbody td{width:auto!important;min-width:0!important;white-space:normal!important;
+    word-break:break-word;overflow-wrap:break-word;padding:.5rem .35rem;font-size:.68rem}
+  thead th{font-size:.58rem;line-height:1.2}
+  table th:nth-child(1), table td:nth-child(1){width:12%!important}
+  table th:nth-child(2), table td:nth-child(2){width:23%!important}
+  table th:nth-child(5), table td:nth-child(5){width:33%!important}
+  table th:nth-child(10), table td:nth-child(10){width:20%!important}
+  table th:nth-child(11), table td:nth-child(11){width:12%!important;padding:.5rem .2rem}
+  .btn-detail{width:26px;height:26px}
+  .btn-detail-icon{font-size:.8rem}
 }
 </style>
 </head>

@@ -191,7 +191,7 @@ tbody tr:hover td.col-detail{background:#eef7e6}
 /* DETAIL PANEL */
 #detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center}
 #detail-overlay.open{display:flex}
-#detail-panel{background:var(--paper);border-radius:16px 16px 0 0;width:100%;max-width:780px;max-height:82vh;overflow-y:auto;padding:1.5rem;box-shadow:0 -8px 40px rgba(0,0,0,.2)}
+#detail-panel{background:var(--paper);border-radius:16px 16px 0 0;width:100%;max-width:780px;max-height:82vh;max-height:82dvh;overflow-y:auto;padding:1.5rem;box-shadow:0 -8px 40px rgba(0,0,0,.2)}
 .dp-header{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.2rem}
 .dp-title{flex:1;min-width:0}
 .dp-title h3{font-size:1.05rem;font-weight:700;color:var(--g2);margin-bottom:.2rem;line-height:1.4}
@@ -219,7 +219,7 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
 @media(max-width:700px){
   header h1{display:none}
   .fg select{min-width:120px;max-width:180px}
-  #detail-panel{max-height:90vh}
+  #detail-panel{max-height:88vh;max-height:85dvh;padding:1.1rem}
   .dp-grid{grid-template-columns:1fr}
   /* Em mobile a toolbar deixa de ficar fixa — senão ocupa o ecrã quase todo
      e sobra pouquíssimo espaço para ver a tabela. Só o cabeçalho fica sticky. */

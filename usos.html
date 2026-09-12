@@ -56,7 +56,7 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 /* TOOLBAR */
 #toolbar{background:var(--paper);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:none;flex-wrap:wrap;gap:.6rem;align-items:flex-end;position:sticky;top:58px;left:0;z-index:200}
 #toolbar.active{display:flex}
-.search-wrap{flex:1;min-width:220px;position:relative}
+.search-wrap{flex:0 1 280px;min-width:220px;max-width:320px;position:relative}
 .search-wrap input{width:100%;padding:.55rem .8rem .55rem 2.3rem;border:1.5px solid var(--border);border-radius:8px;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:.83rem;background:#fff;transition:border-color .2s;color:var(--ink)}
 .search-wrap input:focus{outline:none;border-color:var(--g3);box-shadow:0 0 0 3px rgba(45,122,79,.1)}
 .search-wrap::before{content:'⌕';position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--muted);pointer-events:none;line-height:1}
@@ -291,6 +291,28 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
   .btn-detail{width:24px;height:24px}
   .btn-detail-icon{font-size:.8rem}
 }
+
+/* ══════════════ LMR (Limites Máximos de Resíduos - UE) ══════════════ */
+.lmr-section{padding-top:.25rem}
+.lmr-loading{color:#888;font-size:.85rem;padding:.4rem 0}
+.lmr-item{
+  border-left:3px solid #ccc;
+  padding:.4rem .7rem;
+  margin:.4rem 0;
+  border-radius:0 6px 6px 0;
+  background:#fafafa;
+  font-size:.9rem;
+}
+.lmr-item.lmr-ok{border-left-color:#4a8c3c;background:#f3f9f1}
+.lmr-item.lmr-default{border-left-color:#c98a2b;background:#fbf4e8}
+.lmr-item.lmr-none{border-left-color:#bbb;color:#777;font-style:italic}
+.lmr-badge{
+  font-size:.7rem;font-weight:600;color:#8a5a12;background:#f5e2bd;
+  padding:1px 7px;border-radius:4px;margin-left:.4rem;
+}
+.lmr-meta{font-size:.78rem;color:#666;margin-top:.15rem}
+.lmr-meta a{color:#4a7c3c}
+.lmr-disclaimer{font-size:.78rem;color:#888;margin-top:.6rem;line-height:1.4}
 </style>
 </head>
 <body>
@@ -474,6 +496,9 @@ const ESTADO_BY_LABEL = Object.fromEntries(ESTADOS.map(e=>[e.label,e]));
 /* ══════════════ STATE ══════════════ */
 let ALL=[], FILT=[], PAGE=1, PP=100;
 let SORT_COL=null, SORT_ASC=true;
+let CURRENT_DETAIL_IDX=null;   // registo atualmente aberto no painel de detalhe (para LMR)
+let LMR_INDEX=null;            // índice cultura -> ficheiro lmr/<slug>.json (carregado uma vez)
+const LMR_CACHE={};            // cache dos ficheiros lmr/*.json já pedidos nesta sessão
 const DATASETS={};   // { AUT:[...], CAN:[...], ... }
 
 const DB_NAME='sifito_db3', DB_VER=1, STORE='records';
@@ -852,6 +877,24 @@ function updateStickyTop(){
   document.documentElement.style.setProperty('--sticky-top',(hh+th)+'px');
 }
 
+/* Observa a própria barra de filtros (não só a janela): qualquer mudança
+   no seu conteúdo que altere a altura (botão "Limpar" a aparecer, textos
+   a ajustar, contadores a carregar e a forçar quebra de linha, etc.)
+   recalcula a posição das barras coladas por baixo, em vez de ficar presa
+   à medição feita no arranque. */
+let _stickyObserverStarted=false;
+function startStickyObserver(){
+  if(_stickyObserverStarted) return;
+  _stickyObserverStarted=true;
+  const toolbar=document.getElementById('toolbar');
+  const header=document.querySelector('header');
+  if(window.ResizeObserver){
+    const ro=new ResizeObserver(()=>updateStickyTop());
+    ro.observe(toolbar);
+    ro.observe(header);
+  }
+}
+
 /* ══════════════ BANNER "O QUE MUDOU" ══════════════
    Lê o alteracoes.json gerado pelo workflow semanal (compute_changes.py).
    Se o ficheiro não existir ainda, ou não houver nada a assinalar,
@@ -898,6 +941,7 @@ async function showApp(){
   // percorrer os 130 mil registos e só servem depois de já se ver algo no ecrã.
   applyFilters();
   requestAnimationFrame(updateStickyTop);
+  startStickyObserver();
   window.addEventListener('resize',updateStickyTop);
 
   // Trabalho pesado, adiado para depois da primeira pintura da tabela
@@ -1404,8 +1448,82 @@ function goPage(n){
 }
 
 /* ══════════════ DETAIL PANEL ══════════════ */
+/* ══════════════ LMR (Limites Máximos de Resíduos - UE) ══════════════ */
+async function carregarLMR(cultura){
+  if(!LMR_INDEX){
+    try{
+      LMR_INDEX = await fetch('lmr/_index.json').then(r=>r.json());
+    }catch(e){
+      console.error('Não foi possível carregar o índice de LMR:', e);
+      LMR_INDEX = {};
+    }
+  }
+  const ficheiro = LMR_INDEX[cultura];
+  if(!ficheiro) return null;
+
+  if(!LMR_CACHE[ficheiro]){
+    try{
+      LMR_CACHE[ficheiro] = await fetch('lmr/'+ficheiro).then(r=>r.json());
+    }catch(e){
+      console.error('Não foi possível carregar lmr/'+ficheiro+':', e);
+      return null;
+    }
+  }
+  return LMR_CACHE[ficheiro];
+}
+
+function renderLMRBlocos(r, dadosCultura){
+  if(!dadosCultura){
+    return `<div class="lmr-item lmr-none">Sem dados de LMR disponíveis para esta cultura.</div>`;
+  }
+  const substancias=(r.substancia||'').split('+').map(s=>s.trim()).filter(Boolean);
+
+  return substancias.map(sub=>{
+    const info=dadosCultura[sub];
+    if(!info){
+      return `<div class="lmr-item lmr-none">
+          <strong>${esc(sub)}</strong> — sem LMR específico definido na base da UE
+        </div>`;
+    }
+    const valores=Array.isArray(info)?info:[info];
+    return valores.map(v=>`
+      <div class="lmr-item ${v.is_default?'lmr-default':'lmr-ok'}">
+        <strong>${esc(sub)}</strong> — ${v.mrl} mg/kg
+        ${v.is_default?'<span class="lmr-badge">valor por defeito</span>':''}
+        <div class="lmr-meta">
+          Produto UE: ${esc(v.produto_eu)}${v.regulamento?` · <a href="${esc(v.url_regulamento)}" target="_blank" rel="noopener">${esc(v.regulamento)}</a>`:''}
+        </div>
+      </div>`).join('');
+  }).join('');
+}
+
+function renderLMRSectionPlaceholder(){
+  return `<hr class="dp-sep">
+    <div class="dp-obs-section lmr-section" id="lmr-section">
+      <label style="font-weight:600">Limite Máximo de Resíduos (UE)</label>
+      <div class="lmr-loading">A carregar…</div>
+    </div>`;
+}
+
+async function atualizarLMRSecao(idx, r){
+  const dadosCultura = await carregarLMR(r.cultura);
+  if(CURRENT_DETAIL_IDX!==idx) return; // o utilizador já abriu outro registo
+
+  const section=document.getElementById('lmr-section');
+  if(!section) return;
+
+  section.innerHTML=`
+    <label style="font-weight:600">Limite Máximo de Resíduos (UE)</label>
+    ${renderLMRBlocos(r, dadosCultura)}
+    <p class="lmr-disclaimer">
+      LMR = limite legal de resíduo no alimento colhido. Não confirma nem infirma
+      se este uso está autorizado em Portugal — essa informação está no resto da ficha.
+    </p>`;
+}
+
 function showDetail(idx){
   const r=FILT[idx]; if(!r) return;
+  CURRENT_DETAIL_IDX=idx;
 
   const field=(label,val,full=false)=>
     `<div class="dp-field${full?' dp-full':''}">
@@ -1468,9 +1586,12 @@ function showDetail(idx){
       ${obs('Situação Particular',             r.sit_particular)}
       ${obs('Época / Estado Fenológico',       r.epoca)}
       ${obs('Cond. e Restrições Específicas',  r.restricoes)}
-    </div>`:''}`;
+    </div>`:''}
+
+    ${renderLMRSectionPlaceholder()}`;
 
   document.getElementById('detail-overlay').classList.add('open');
+  atualizarLMRSecao(idx, r);
 }
 
 function closeDetail(e){

@@ -72,7 +72,7 @@ MAX_RETRIES = 3
 # (este URL sem data de consolidação mantém-se válido para sempre, a
 # própria página do EUR-Lex é que vai sempre mostrar a versão atual).
 REGULAMENTO_BASE = "Regulamento (CE) n.º 396/2005"
-REGULAMENTO_BASE_URL = "https://eur-lex.europa.eu/eli/reg/2005/396"
+REGULAMENTO_BASE_URL = "https://eur-lex.europa.eu/legal-content/pt/TXT/?uri=CELEX%3A32005R0396"
 
 # Alguns gateways da administração pública rejeitam (400/403) pedidos sem
 # cabeçalhos de um pedido "normal" de browser. Enviamos um User-Agent e

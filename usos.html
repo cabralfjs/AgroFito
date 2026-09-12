@@ -65,6 +65,11 @@ header h1{font-size:.95rem;font-weight:600;flex:1;letter-spacing:-.01em}
 .fg select{padding:.5rem .65rem;border:1.5px solid var(--border);border-radius:8px;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:.8rem;background:#fff;cursor:pointer;transition:border-color .2s;min-width:120px;max-width:190px}
 #f-pp{min-width:70px!important;max-width:80px!important}
 .fg select:focus{outline:none;border-color:var(--g3)}
+.fav-toggle-input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.fav-toggle-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1.5px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:1.05rem;transition:all .2s;flex-shrink:0}
+.fav-toggle-btn:hover{border-color:var(--g3)}
+.fav-toggle-input:checked+.fav-toggle-btn{background:#fff6d6;border-color:#e0b400;box-shadow:0 0 0 3px rgba(224,180,0,.15)}
+.fav-toggle-input:focus-visible+.fav-toggle-btn{outline:2px solid var(--g3);outline-offset:1px}
 
 /* ── COMBOBOX (searchable dropdown) ── */
 .cb-wrap{position:relative;min-width:130px;max-width:190px}
@@ -436,10 +441,8 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
     </select>
   </div>
   <button class="btn btn-ghost" onclick="clearFilters()">✕ Limpar</button>
-  <label style="display:flex;align-items:center;gap:.35rem;font-size:.8rem;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap">
-    <input type="checkbox" id="f-fav-only" onchange="applyFilters()" style="width:16px;height:16px;cursor:pointer">
-    ⭐ Só favoritos
-  </label>
+  <input type="checkbox" id="f-fav-only" onchange="applyFilters()" class="fav-toggle-input">
+  <label for="f-fav-only" class="fav-toggle-btn" title="Mostrar só favoritos">⭐</label>
 </div>
 
 <!-- LEGEND BAR -->

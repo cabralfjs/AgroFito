@@ -193,7 +193,7 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
    existe este evento — lá a instalação é via "Adicionar ao ecrã principal"
    no menu de partilha do Safari, não há botão programático possível). */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).catch(()=>{});
 }
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',(e)=>{

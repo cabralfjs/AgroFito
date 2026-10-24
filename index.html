@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <!-- SEO Base -->
 <title>AgroFito — Consulta de Produtos Fitofarmacêuticos e Usos SIFITO / DGAV</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Ccircle cx='26' cy='26' r='26' fill='%230f3d22'/%3E%3Cpath d='M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z' fill='%237cb83a'/%3E%3C/svg%3E">
@@ -13,32 +12,29 @@
 <meta name="keywords" content="SIFITO, DGAV, fitofarmacêuticos, produtos fitofarmacêuticos, agrofito, substâncias ativas, proteção de plantas, agricultura Portugal">
 <meta name="author" content="Francisco Cabral">
 <link rel="canonical" href="https://agrofito.org/">
-
 <!-- Open Graph / WhatsApp / Redes Sociais -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://agrofito.org/">
 <meta property="og:title" content="AgroFito — Consulta de Produtos Fitofarmacêuticos">
 <meta property="og:description" content="Pesquisa integrada de produtos fitofarmacêuticos, culturas e finalidades autorizadas pela DGAV/SIFITO em Portugal.">
 <meta property="og:locale" content="pt_PT">
-
 <!-- Schema.org (Dados Estruturados) -->
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "AgroFito",
-  "url": "https://agrofito.org/",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "All",
-  "description": "Ferramenta de consulta avançada de produtos fitofarmacêuticos e finalidades autorizadas em Portugal com base nos dados oficiais da DGAV/SIFITO.",
-  "author": {
-    "@type": "Person",
-    "name": "Francisco Cabral",
-    "email": "mailto:info@agrofito.org"
-  }
+"@context": "https://schema.org",
+"@type": "WebApplication",
+"name": "AgroFito",
+"url": "https://agrofito.org/",
+"applicationCategory": "BusinessApplication",
+"operatingSystem": "All",
+"description": "Ferramenta de consulta avançada de produtos fitofarmacêuticos e finalidades autorizadas em Portugal com base nos dados oficiais da DGAV/SIFITO.",
+"author": {
+"@type": "Person",
+"name": "Francisco Cabral",
+"email": "mailto:info@agrofito.org"
+}
 }
 </script>
-
 <style>
 :root{--g1:#0f3d22;--g2:#1a5c35;--g3:#2d7a4f;--lime:#7cb83a;--lime2:#c5e89a;--cream:#f4f0e8;--paper:#fdfaf4;--ink:#18180f;--muted:#6b6b5a;--border:#d6d0c4;--tag-bg:#e6f2da;--tag-fg:#1a5c35}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -66,7 +62,6 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 .arrow{transition:transform .15s}
 .module-card:hover .arrow{transform:translateX(4px)}
 .ch-box a{color:var(--g2);font-weight:700;text-decoration:underline;margin-left:auto}
-
 .notice-bar{max-width:860px;width:100%;background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem 1rem;font-size:.76rem;color:#7a5200;line-height:1.5;display:flex;gap:.6rem;align-items:flex-start}
 .notice-bar .icon{font-size:1rem;flex-shrink:0;margin-top:1px}
 .install-card{display:none;max-width:280px;width:100%;background:var(--paper);border:1.5px solid var(--lime);border-radius:8px;padding:.6rem .8rem;font-size:.78rem;color:var(--ink);align-items:center;gap:.5rem}
@@ -81,112 +76,137 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 </style>
 </head>
 <body>
-
 <header>
-  <svg class="logo-svg" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="26" cy="26" r="26" fill="rgba(255,255,255,.12)"/>
-    <path d="M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z" fill="#7cb83a"/>
-    <line x1="26" y1="10" x2="26" y2="42" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="26" y1="18" x2="16" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
-    <line x1="26" y1="18" x2="36" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
-    <line x1="26" y1="26" x2="14" y2="30" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-linecap="round"/>
-    <line x1="26" y1="26" x2="38" y2="30" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-linecap="round"/>
-  </svg>
-  <div class="logo-text">
-    <h1><span>Agro</span>Fito</h1>
-    <p>Ferramenta de Consulta de Produtos Fitofarmacêuticos</p>
-  </div>
-</header>
-
-<div class="hero">
-  <h2>Consulta de Produtos Fitofarmacêuticos</h2>
-  <p>Pesquisa de produtos autorizados e cancelados em Portugal, com dados oficiais da <a href="https://www.dgav.pt" target="_blank" rel="noopener noreferrer">DGAV</a>.</p>
+<svg class="logo-svg" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+<circle cx="26" cy="26" r="26" fill="rgba(255,255,255,.12)"/>
+<path d="M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z" fill="#7cb83a"/>
+<line x1="26" y1="10" x2="26" y2="42" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="16" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="36" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+<line x1="26" y1="26" x2="14" y2="30" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-linecap="round"/>
+<line x1="26" y1="26" x2="38" y2="30" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div class="logo-text">
+<h1><span>Agro</span>Fito</h1>
+<p>Ferramenta de Consulta de Produtos Fitofarmacêuticos</p>
 </div>
-
+</header>
+<div class="hero">
+<h2>Consulta de Produtos Fitofarmacêuticos</h2>
+<p>Pesquisa de produtos autorizados e cancelados em Portugal, com dados oficiais da <a href="https://www.dgav.pt" target="_blank" rel="noopener noreferrer">DGAV</a>. Ferramentas técnicas de cálculo e suporte para a pulverização.</p>
+</div>
 <div class="modules-section">
 <!-- changes-highlight removido a pedido -->
-  <div class="modules-grid">
-    <a class="module-card" href="usos.html">
-      <div class="module-icon">📋</div>
-      <h3>Condições de Utilização</h3>
-      <p>Pesquisa de finalidades autorizadas e canceladas. Filtre por cultura, inimigo, produto, substância ativa e estado de autorização.</p>
-      <div class="module-stats">
-        <span class="stat-tag">~130 000 registos</span>
-        <span class="stat-tag">4 estados</span>
-      </div>
-      <span class="module-cta">Consultar <span class="arrow">→</span></span>
-    </a>
-    <a class="module-card" href="produtos.html">
-      <div class="module-icon">🔬</div>
-      <h3>Produtos Fitofarmacêuticos</h3>
-      <p>Pesquisa de autorizações de venda. Filtre por designação comercial, titular, substância ativa, formulação e tipo de utilização.</p>
-      <div class="module-stats">
-        <span class="stat-tag">~6 000 registos</span>
-        <span class="stat-tag">4 estados</span>
-        <span class="stat-tag">MPB · Baixo Risco</span>
-      </div>
-      <span class="module-cta">Consultar <span class="arrow">→</span></span>
-    </a>
-    <a class="module-card" href="lmr.html">
-      <div class="module-icon">⚖️</div>
-      <h3>Consulta de LMR por Cultura</h3>
-      <p>Limites Máximos de Resíduos (LMR) diretamente da base oficial da Comissão Europeia. Escolhe uma cultura e vê todos os valores aplicáveis.</p>
-      <div class="module-stats">
-        <span class="stat-tag">213 culturas mapeadas</span>
-        <span class="stat-tag">Atualização semanal</span>
-      </div>
-      <span class="module-cta">Consultar <span class="arrow">→</span></span>
-    </a>
-  </div>
-
-  <div class="notice-bar">
-    <span class="icon">⚠️</span>
-    <span>
-      <strong>Aviso:</strong> Os dados públicos da DGAV/SIFITO e dos Limites Máximos de Resíduos são atualizados semanalmente e podem não refletir alterações recentes. Consulte sempre as páginas oficiais.
-    </span>
-  </div>
-
-  <div class="install-card" id="install-card">
-    <span class="install-icon">📲</span>
-    <span class="install-text">Instalar no telemóvel/PC</span>
-    <button class="install-btn" onclick="installApp()">Instalar</button>
-  </div>
+<div class="modules-grid">
+<a class="module-card" href="usos.html">
+<div class="module-icon">📋</div>
+<h3>Condições de Utilização</h3>
+<p>Pesquisa de finalidades autorizadas e canceladas. Filtre por cultura, inimigo, produto, substância ativa e estado de autorização.</p>
+<div class="module-stats">
+<span class="stat-tag">~130 000 registos</span>
+<span class="stat-tag">4 estados</span>
 </div>
-
+<span class="module-cta">Consultar <span class="arrow">→</span></span>
+</a>
+<a class="module-card" href="produtos.html">
+<div class="module-icon">🔬</div>
+<h3>Produtos Fitofarmacêuticos</h3>
+<p>Pesquisa de autorizações de venda. Filtre por designação comercial, titular, substância ativa, formulação e tipo de utilização.</p>
+<div class="module-stats">
+<span class="stat-tag">~6 000 registos</span>
+<span class="stat-tag">4 estados</span>
+<span class="stat-tag">MPB · Baixo Risco</span>
+</div>
+<span class="module-cta">Consultar <span class="arrow">→</span></span>
+</a>
+<a class="module-card" href="lmr.html">
+<div class="module-icon">⚖️</div>
+<h3>Consulta de LMR por Cultura</h3>
+<p>Limites Máximos de Resíduos (LMR) diretamente da base oficial da Comissão Europeia. Escolhe uma cultura e vê todos os valores aplicáveis.</p>
+<div class="module-stats">
+<span class="stat-tag">213 culturas mapeadas</span>
+<span class="stat-tag">Atualização semanal</span>
+</div>
+<span class="module-cta">Consultar <span class="arrow">→</span></span>
+</a>
+<a class="module-card" href="tecnicas.html">
+<div class="module-icon">🚜</div>
+<h3>Técnicas de Aplicação</h3>
+<p>Métodos para determinar o volume de calda para pomares e vinhas: Leaf Wall Area (LWA) e Tree-Row Volume (TRV).</p>
+<div class="module-stats">
+<span class="stat-tag">LWA</span>
+<span class="stat-tag">TRV</span>
+<span class="stat-tag">2 calculadoras</span>
+</div>
+<span class="module-cta">Consultar <span class="arrow">→</span></span>
+</a>
+<a class="module-card" href="quantidade.html">
+<div class="module-icon">🧪</div>
+<h3>Quantidade de Fitofarmacêutico</h3>
+<p>Quantidade de produto fitofarmacêutico por depósito do pulverizador, a partir da dose ou da concentração indicada no rótulo.</p>
+<div class="module-stats">
+<span class="stat-tag">Dose</span>
+<span class="stat-tag">Concentração</span>
+<span class="stat-tag">Calculadora</span>
+</div>
+<span class="module-cta">Consultar <span class="arrow">→</span></span>
+</a>
+<a class="module-card" href="volume-calda.html">
+<div class="module-icon">💧</div>
+<h3>Volume de Calda</h3>
+<p>Volume de calda por hectare a partir do débito, da velocidade de avanço e da largura de trabalho ou entrelinha. Calcula também o débito e a velocidade necessários.</p>
+<div class="module-stats">
+<span class="stat-tag">Culturas baixas</span>
+<span class="stat-tag">Pomares e vinhas</span>
+<span class="stat-tag">3 funções</span>
+</div>
+<span class="module-cta">Consultar <span class="arrow">→</span></span>
+</a>
+</div>
+<div class="notice-bar">
+<span class="icon">⚠️</span>
+<span>
+<strong>Aviso:</strong> Os dados públicos da DGAV/SIFITO e dos Limites Máximos de Resíduos são atualizados semanalmente e podem não refletir alterações recentes. Consulte sempre as páginas oficiais.
+</span>
+</div>
+<div class="install-card" id="install-card">
+<span class="install-icon">📲</span>
+<span class="install-text">Instalar no telemóvel/PC</span>
+<button class="install-btn" onclick="installApp()">Instalar</button>
+</div>
+</div>
 <div class="attribution">
-  <p><strong>Páginas Oficiais:</strong> DGAV/<a href="https://sifito.dgav.pt/" target="_blank" rel="noopener noreferrer">SIFITO</a> &nbsp;·&nbsp; Comissão Europeia/<a href="https://food.ec.europa.eu/plants/pesticides/eu-pesticides-database_en" target="_blank" rel="noopener noreferrer">EU Pesticides Database</a></p>
-  <p style="margin-top:.4rem;opacity:.8;font-size:.72rem">
-    Projeto independente, sem afiliação com a DGAV nem com a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; V1.4
-  </p>
-  <p style="margin-top:.5rem;opacity:.55;font-size:.68rem">
-    <strong>Privacidade:</strong> não recolhemos dados pessoais. Os ficheiros importados ficam guardados só no seu navegador.
-  </p>
+<p><strong>Páginas Oficiais:</strong> DGAV/<a href="https://sifito.dgav.pt/" target="_blank" rel="noopener noreferrer">SIFITO</a> &nbsp;·&nbsp; Comissão Europeia/<a href="https://food.ec.europa.eu/plants/pesticides/eu-pesticides-database_en" target="_blank" rel="noopener noreferrer">EU Pesticides Database</a></p>
+<p style="margin-top:.4rem;opacity:.8;font-size:.72rem">
+Projeto independente, sem afiliação com a DGAV nem com a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; V1.5
+</p>
+<p style="margin-top:.5rem;opacity:.55;font-size:.68rem">
+<strong>Privacidade:</strong> não recolhemos dados pessoais. Os ficheiros importados ficam guardados só no seu navegador.
+</p>
 </div>
-
 <script>
-
 /* PWA: regista o service worker e mostra o botão "Instalar" quando o
-   browser oferecer essa opção (Chrome/Edge no Android/PC; no iOS não
-   existe este evento — lá a instalação é via "Adicionar ao ecrã principal"
-   no menu de partilha do Safari, não há botão programático possível). */
+browser oferecer essa opção (Chrome/Edge no Android/PC; no iOS não
+existe este evento — lá a instalação é via "Adicionar ao ecrã principal"
+no menu de partilha do Safari, não há botão programático possível). */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).catch(()=>{});
+navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).catch(()=>{});
 }
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',(e)=>{
-  e.preventDefault();
-  deferredInstallPrompt=e;
-  document.getElementById('install-card').classList.add('show');
+e.preventDefault();
+deferredInstallPrompt=e;
+document.getElementById('install-card').classList.add('show');
 });
 async function installApp(){
-  if(!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt=null;
-  document.getElementById('install-card').classList.remove('show');
+if(!deferredInstallPrompt) return;
+deferredInstallPrompt.prompt();
+await deferredInstallPrompt.userChoice;
+deferredInstallPrompt=null;
+document.getElementById('install-card').classList.remove('show');
 }
 window.addEventListener('appinstalled',()=>{
-  document.getElementById('install-card').classList.remove('show');
+document.getElementById('install-card').classList.remove('show');
 });
 </script>
 </body>

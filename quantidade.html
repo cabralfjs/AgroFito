@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantidade de Fitofarmacêutico — AgroFito</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Ccircle cx='26' cy='26' r='26' fill='%230f3d22'/%3E%3Cpath d='M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z' fill='%237cb83a'/%3E%3C/svg%3E">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f3d22">
+<meta name="description" content="Calculadora da quantidade de produto fitofarmacêutico por depósito do pulverizador, a partir da dose ou da concentração indicada no rótulo.">
+<meta name="author" content="Francisco Cabral">
+<style>
+:root{--g1:#0f3d22;--g2:#1a5c35;--g3:#2d7a4f;--lime:#7cb83a;--lime2:#c5e89a;--cream:#f4f0e8;--paper:#fdfaf4;--ink:#18180f;--muted:#6b6b5a;--border:#d6d0c4;--tag-bg:#e6f2da;--tag-fg:#1a5c35}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 100%);padding:.75rem 2rem;display:flex;align-items:center;gap:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+.logo-svg{width:38px;height:38px;flex-shrink:0}
+.logo-text h1{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
+.logo-text h1 span{font-weight:300;opacity:.85}
+.logo-text p{font-size:.72rem;color:var(--lime2);margin-top:.15rem;letter-spacing:.02em}
+.back{margin-left:auto;color:#fff;font-size:.8rem;text-decoration:none;border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:.4rem .8rem}
+.back:hover{background:rgba(255,255,255,.12)}
+.hero{background:linear-gradient(180deg,var(--g2) 0%,var(--g3) 100%);padding:1.5rem 2rem;text-align:center;color:#fff}
+.hero h2{font-size:1.45rem;font-weight:700;margin-bottom:.35rem;letter-spacing:-.02em}
+.hero p{font-size:.85rem;opacity:.85;max-width:600px;margin:0 auto;line-height:1.5}
+main{flex:1;padding:1.25rem 1rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.tab{font:inherit;font-size:.85rem;font-weight:600;padding:.5rem 1.1rem;border-radius:999px;border:1.5px solid var(--border);background:var(--paper);color:var(--g2);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--g2);color:#fff;border-color:var(--g2)}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.card{background:var(--paper);border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;width:100%;max-width:900px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.card[hidden]{display:none}
+.card h3{font-size:1.2rem;color:var(--g2);margin-bottom:.2rem}
+.card h4{font-size:.95rem;color:var(--g2);margin:1.1rem 0 .4rem}
+.sub{font-size:.78rem;color:var(--muted);margin-bottom:.8rem}
+.card p,.card li{font-size:.88rem;line-height:1.6;max-width:72ch}
+.card ul,.card ol{padding-left:1.4rem;margin:.3rem 0}
+.card li+li{margin-top:.25rem}
+.banner{position:relative;margin:.6rem 0 1.1rem;border-radius:10px;overflow:hidden;aspect-ratio:4/1;background:var(--g1)}
+.banner img{width:100%;height:100%;object-fit:cover;object-position:50% 62%;display:block}
+.banner span{position:absolute;right:.6rem;bottom:.5rem;font-size:.68rem;color:#fff;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:10px}
+figcaption{font-size:.74rem;color:var(--muted);margin-top:.45rem;line-height:1.45}
+.lead{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:1.1rem}
+.lead p{max-width:none}
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:1rem;align-items:stretch;margin-bottom:1rem}
+figure{margin:0;background:#fff;border:1px solid var(--border);border-radius:10px;padding:.6rem;display:flex;flex-direction:column}
+figure img{width:100%;height:auto;display:block;border-radius:6px}
+.formula-box{background:#fff;border:1px solid var(--border);border-left:4px solid var(--lime);border-radius:10px;padding:1rem 1.2rem;display:flex;flex-direction:column;justify-content:center}
+.formula-box h4{margin:0 0 .6rem}
+.formula-box img{display:block;width:100%;max-width:340px;height:auto;margin:0 auto .8rem}
+.formula-box .legend{font-size:.82rem;line-height:1.65}
+.formula-box .legend b{color:var(--g1)}
+.cols,.cols3{display:grid;gap:1rem;margin-bottom:1rem;align-items:stretch}
+.cols{grid-template-columns:1fr 1fr}
+.cols3{grid-template-columns:repeat(3,1fr)}
+.cols>div,.cols3>div{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem}
+.cols h4,.cols3 h4{margin:0 0 .5rem}
+.cols p,.cols3 p{margin-top:.6rem}
+.cols h4+p,.cols3 h4+p{margin-top:0}
+.cols .formula,.cols3 .formula{margin:.7rem 0 0}
+.cols .formula code,.cols3 .formula code{white-space:normal}
+@media(max-width:900px){.cols3{grid-template-columns:1fr}}
+@media(max-width:720px){.lead,.split,.cols{grid-template-columns:1fr}}
+.formula{background:var(--tag-bg);border-left:4px solid var(--lime);border-radius:6px;padding:.7rem .9rem;margin:.6rem 0;font-size:.9rem}
+.formula code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:600;color:var(--g1)}
+.formula small{display:block;margin-top:.3rem;font-size:.75rem;color:var(--muted);line-height:1.5}
+.calc{background:#fff;border:1.5px solid var(--lime);border-radius:10px;padding:1.1rem;margin-top:1.1rem}
+.calc h4{margin-top:0}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin:.7rem 0}
+label{display:block;font-size:.76rem;font-weight:600;color:var(--g2);margin-bottom:.25rem}
+input,select{width:100%;font:inherit;font-size:.9rem;padding:.5rem .6rem;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);color:var(--ink)}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{font:inherit;font-size:.82rem;font-weight:600;padding:.5rem 1rem;border-radius:7px;border:none;cursor:pointer;background:var(--g2);color:#fff}
+.btn:hover{background:var(--g3)}
+.btn.sec{background:transparent;color:var(--g2);border:1.5px solid var(--g2)}
+.result{margin-top:.9rem;padding:.8rem 1rem;background:var(--tag-bg);border-radius:8px;font-size:.9rem;min-height:2.6rem}
+.result strong{font-size:1.25rem;color:var(--g1)}
+.result .err{color:#9a1c1c;font-weight:600}
+.result .extra{display:block;font-size:.76rem;color:var(--muted);margin-top:.25rem}
+.warn{background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem .9rem;font-size:.78rem;color:#7a5200;line-height:1.5;margin-top:.9rem}
+.notice-bar{max-width:900px;width:100%;background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem 1rem;font-size:.76rem;color:#7a5200;line-height:1.5}
+.attribution{background:var(--g1);color:rgba(255,255,255,.75);padding:.75rem 2rem;text-align:center;font-size:.72rem;line-height:1.6}
+.attribution a{color:var(--lime2);text-decoration:underline}
+.attribution strong{color:#fff}
+@media(max-width:600px){header{padding:.75rem 1rem}.hero h2{font-size:1.2rem}.card{padding:1rem}.logo-text h1{font-size:1.1rem}.back{padding:.35rem .6rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.cols1{display:grid;gap:1rem;margin-bottom:1rem}
+details{margin-top:.8rem;border:1px solid var(--border);border-radius:8px;background:var(--paper);padding:.6rem .8rem}
+summary{cursor:pointer;font-size:.8rem;font-weight:600;color:var(--g2)}
+details[open] summary{margin-bottom:.6rem}
+.modes{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.mode[hidden]{display:none}
+.fields .row2{display:grid;grid-template-columns:1.4fr 1fr;gap:.5rem}
+.eq{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;white-space:nowrap;gap:.45rem;font-family:"Cambria Math",Cambria,Georgia,serif;font-size:1.3rem;font-weight:600;color:var(--g1);margin:.2rem 0 .9rem}
+.eq .fr{display:inline-flex;flex-direction:column;align-items:center}
+.eq .fr>span:first-child{border-bottom:2px solid var(--g1);padding:0 .4rem .12rem}
+.eq .fr>span:last-child{padding-top:.12rem}
+.eq-t{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin:.3rem 0 0}
+.eq.sm{font-size:1rem;margin:.1rem 0 .2rem}
+.formula .eq{margin:0}
+.formula small{display:block;text-align:center;margin-top:.4rem}
+.eq-r{text-align:center;font-family:"Cambria Math",Cambria,Georgia,serif;font-weight:700;font-size:1.02rem;color:var(--g1);margin:.15rem 0 .1rem}
+.ul-cols{columns:3;column-gap:1.4rem;padding-left:1.2rem}
+.ul-cols li{break-inside:avoid;margin-bottom:.6rem}
+@media(max-width:900px){.ul-cols{columns:1}}
+@media(max-width:480px){.eq{font-size:1.1rem}.eq.sm{font-size:.9rem}}
+@media(max-width:600px){
+input,select{font-size:16px;min-height:44px}
+.btn,.tab{min-height:44px}
+.back{padding:.65rem .85rem}
+summary{padding:.55rem 0;font-size:.85rem}
+.info{position:relative}
+.info::after{content:"";position:absolute;inset:-14px}
+}
+.home{display:flex;align-items:center;gap:1.25rem;color:inherit;text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+<a class="home" href="index.html" aria-label="AgroFito: página inicial"><svg class="logo-svg" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="26" cy="26" r="26" fill="rgba(255,255,255,.12)"/>
+<path d="M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z" fill="#7cb83a"/>
+<line x1="26" y1="10" x2="26" y2="42" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="16" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="36" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div class="logo-text">
+<h1><span>Agro</span>Fito</h1>
+<p>Quantidade de Fitofarmacêutico</p>
+</div></a>
+<a class="back" href="index.html">Início</a>
+</header>
+
+<div class="hero">
+<h2>Quantidade de Fitofarmacêutico</h2>
+<p>Determinar a quantidade de produto fitofarmacêutico em cada depósito do pulverizador de dorso.</p>
+</div>
+
+<main>
+<section class="card" id="p-qtd">
+<h3>Quantidade de produto por depósito</h3>
+<p class="sub">Guia prático para pulverizadores de dorso</p>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-dorso.svg'" src="img/banner-dorso.svg" alt="Pulverizador de dorso em utilização" loading="lazy"></div>
+
+<div class="lead">
+<p>Na preparação da calda, é essencial calcular com precisão a quantidade de produto fitofarmacêutico a colocar em cada depósito do pulverizador de dorso. O cálculo depende da área a tratar, da dose do produto e do débito do pulverizador (<i>Dp</i>).</p>
+<p>Este guia foca-se nos pulverizadores de dorso, em aplicações em que se conhece a área-alvo do tratamento, como os herbicidas. Convém conhecer o <a href="https://www.drapc.gov.pt/base/documentos/codigo_conduta_aplicacao_fitofarmacos_dgav.pdf" target="_blank" rel="noopener noreferrer">Código de Conduta na Aplicação de Produtos Fitofarmacêuticos</a>, publicado pela <a href="https://www.dgav.pt/" target="_blank" rel="noopener noreferrer">DGAV</a> em 2020, e ler sempre o rótulo, respeitando as recomendações do fabricante.</p>
+</div>
+
+<div class="split">
+<figure><img onerror="this.onerror=null;this.src='pulverizador-dorso.svg'" src="img/pulverizador-dorso.svg" alt="Pulverizador de dorso com depósito, alavanca da bomba, mangueira e lança" loading="lazy"><figcaption>Pulverizador de dorso.</figcaption></figure>
+<div class="formula-box">
+<h4>Como se calcula</h4>
+<div class="eq"><span><i>Q</i> =</span><span class="fr"><span><i>Capacidade</i> × <i>Dose</i></span><span><i>Dp</i></span></span><span>× 1000</span></div>
+<div class="legend"><b><i>Q</i></b>: quantidade de produto fitofarmacêutico a colocar no depósito (mL ou g)<br><b><i>Capacidade</i></b>: capacidade do depósito do pulverizador (L)<br><b><i>Dose</i></b>: indicada no rótulo (L/ha ou kg/ha)<br><b><i>Dp</i></b>: débito do pulverizador, água para pulverizar 1 ha (L/ha)<br>Com a dose em L ou kg por hectare, o resultado sai em L ou kg e multiplica-se por 1000 para obter mL ou g.</div>
+</div>
+</div>
+
+<div class="cols3">
+<div>
+<h4>Fatores do cálculo</h4>
+<ul>
+<li><b>Área da parcela:</b> é o ponto de partida para saber a quantidade total de produto.</li>
+<li><b>Dose:</b> quantidade de produto por unidade de área, em L/ha ou kg/ha.</li>
+<li><b>Débito do pulverizador (<i>Dp</i>):</b> quantidade de calda que é pulverizada por unidade de área (ha).</li>
+</ul>
+</div>
+<div>
+<h4>Indicações do rótulo</h4>
+<ul>
+<li><b>Concentração:</b> quantidade de produto fitofarmacêutico num volume de água, em g/hL ou mL/hL.</li>
+<li><b>Dose:</b> quantidade total de produto fitofarmacêutico por hectare, em L/ha ou kg/ha.</li>
+</ul>
+</div>
+<div>
+<h4>Tipo de produto</h4>
+<ul>
+<li><b>Herbicidas:</b> apenas em dose, porque a substância é distribuída por uma superfície a tratar.</li>
+<li><b>Fungicidas e inseticidas:</b> usam-se em culturas baixas e também em vinha e pomares, por isso podem vir em dose ou em concentração.</li>
+</ul>
+</div>
+</div>
+
+<div class="cols">
+<div>
+<h4>Exemplo prático</h4>
+<p>Herbicida com pulverizador de dorso de 12 L.</p>
+<ol>
+<li><b>Dose:</b> o rótulo indica 750 mL/ha. A fórmula pede L/ha, logo a dose é 0,75 L/ha.</li>
+<li><b>Débito do pulverizador (<i>Dp</i>):</b> determina-se com o ensaio em branco (ao lado).</li>
+<li><b>Água no depósito:</b> 12 L.</li>
+</ol>
+<div class="formula"><div class="eq sm"><span><i>Q</i> =</span><span class="fr"><span>12 × 0,75</span><span>300</span></span><span>= 0,03 L = 30 mL</span></div><small>Quantidade por depósito, com <i>Dp</i> = 300 L/ha (valor ilustrativo do ensaio ao lado).</small></div>
+</div>
+<div>
+<h4>Ensaio em branco</h4>
+<p>Delimita-se uma área conhecida, em regra um quadrado de 10 m de lado (100 m²), e mede-se a água gasta a pulverizá-la. Depois extrapola-se para 1 ha (10 000 m²).</p>
+<div class="formula"><div class="eq sm"><span><i>Dp</i> =</span><span class="fr"><span>água gasta (L) × 10 000</span><span>área (m²)</span></span></div><small><i>Dp</i>: débito do pulverizador (L/ha). Exemplo ilustrativo: 3 L em 100 m² dão 300 L/ha.</small></div>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora de quantidade de fitofarmacêutico</h4>
+<div class="modes" role="tablist" aria-label="Tipo de indicação no rótulo">
+<button class="tab" role="tab" id="m-dose" aria-selected="true" aria-controls="s-dose">Dose (L/ha, kg/ha)</button>
+<button class="tab" role="tab" id="m-conc" aria-selected="false" aria-controls="s-conc">Concentração (por hL)</button>
+</div>
+
+<div class="mode" id="s-dose" role="tabpanel" aria-labelledby="m-dose">
+<div class="fields">
+<div><label for="d-cap">Capacidade do depósito (L)</label><input id="d-cap" type="text" inputmode="decimal" placeholder="ex.: 12"></div>
+<div><label for="d-dose">Dose do rótulo</label>
+<div class="row2"><input id="d-dose" type="text" inputmode="decimal" placeholder="ex.: 750" aria-label="Dose"><select id="d-unit" aria-label="Unidade da dose"><option value="mL">mL/ha</option><option value="L">L/ha</option><option value="kg">kg/ha</option></select></div></div>
+<div><label for="d-vol">Débito do pulverizador, <i>Dp</i> (L/ha)</label><input id="d-vol" type="text" inputmode="decimal" placeholder="ex.: 300"></div>
+</div>
+<details>
+<summary>Não sei o débito do pulverizador (<i>Dp</i>): calcular pelo ensaio em branco</summary>
+<div class="fields">
+<div><label for="e-agua">Água gasta no ensaio (L)</label><input id="e-agua" type="text" inputmode="decimal" placeholder="ex.: 3"></div>
+<div><label for="e-area">Área do ensaio (m²)</label><input id="e-area" type="text" inputmode="decimal" value="100"></div>
+</div>
+<div class="actions"><button class="btn sec" id="e-calc" type="button">Usar como débito do pulverizador</button></div>
+<div class="result" id="e-res" aria-live="polite">Resultado: --</div>
+</details>
+</div>
+
+<div class="mode" id="s-conc" role="tabpanel" aria-labelledby="m-conc" hidden>
+<div class="fields">
+<div><label for="c-cap">Capacidade do depósito (L)</label><input id="c-cap" type="text" inputmode="decimal" placeholder="ex.: 12"></div>
+<div><label for="c-conc">Concentração do rótulo</label>
+<div class="row2"><input id="c-conc" type="text" inputmode="decimal" placeholder="ex.: 150" aria-label="Concentração"><select id="c-unit" aria-label="Unidade da concentração"><option value="mL">mL/hL</option><option value="g">g/hL</option><option value="kg">kg/hL</option><option value="L">L/hL</option></select></div></div>
+<div><label for="c-vol">Débito do pulverizador, <i>Dp</i> (L/ha), opcional</label><input id="c-vol" type="text" inputmode="decimal" placeholder="para calcular a área tratada"></div>
+</div>
+</div>
+
+<div class="actions">
+<button class="btn" id="q-calc" type="button">Calcular</button>
+<button class="btn sec" id="q-clear" type="button">Limpar</button>
+</div>
+<div class="result" id="q-res" aria-live="polite">Quantidade por depósito: --</div>
+</div>
+</section>
+</main>
+
+<div class="attribution">
+<p style="margin-top:.4rem;opacity:.8">Projeto independente, sem afiliação com a DGAV nem a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> · © 2026</p>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const num=el=>parseFloat(String(el.value).trim().replace(/\s/g,'').replace(',','.'));
+  const nf=(v,d)=>v.toLocaleString('pt-PT',{minimumFractionDigits:0,maximumFractionDigits:d});
+  const ok=(...v)=>v.every(x=>isFinite(x)&&x>0);
+  const err=m=>'<span class="err">'+m+'</span>';
+
+  let mode='dose';
+  function setMode(m){
+    mode=m;
+    $('m-dose').setAttribute('aria-selected',m==='dose');
+    $('m-conc').setAttribute('aria-selected',m==='conc');
+    $('s-dose').hidden=m!=='dose';
+    $('s-conc').hidden=m!=='conc';
+    $('q-res').textContent='Quantidade por depósito: --';
+  }
+  $('m-dose').onclick=()=>setMode('dose');
+  $('m-conc').onclick=()=>setMode('conc');
+
+  function area(cap,vol){
+    if(!ok(vol)) return '';
+    const ha=cap/vol;
+    return '<span class="extra">Área tratada por depósito: '+nf(ha,3)+' ha ('+nf(ha*10000,0)+' m²)</span>';
+  }
+  function show(base,solid,cap,vol){
+    // base em L (líquido) ou kg (sólido)
+    const small=base*1000;
+    const main=solid?nf(small,1)+' g':nf(small,1)+' mL';
+    const sec=solid?nf(base,3)+' kg':nf(base,3)+' L';
+    $('q-res').innerHTML='Quantidade por depósito: <strong>'+main+'</strong> <span class="extra">('+sec+') de produto fitofarmacêutico para '+nf(cap,2)+' L de calda</span>'+area(cap,vol);
+  }
+
+  $('q-calc').onclick=()=>{
+    if(mode==='dose'){
+      const cap=num($('d-cap')),dose=num($('d-dose')),vol=num($('d-vol')),u=$('d-unit').value;
+      if(!ok(cap,dose,vol)){ $('q-res').innerHTML=err('Introduza valores positivos na capacidade, na dose e no débito do pulverizador.'); return; }
+      const d=u==='mL'?dose/1000:dose;      // L/ha ou kg/ha
+      show(cap*d/vol,u==='kg',cap,vol);
+    }else{
+      const cap=num($('c-cap')),conc=num($('c-conc')),vol=num($('c-vol')),u=$('c-unit').value;
+      if(!ok(cap,conc)){ $('q-res').innerHTML=err('Introduza valores positivos na capacidade do depósito e na concentração.'); return; }
+      const q=cap/100*conc;                 // na unidade do rótulo (mL, g, kg ou L)
+      const base=(u==='mL'||u==='g')?q/1000:q; // L ou kg
+      show(base,u==='g'||u==='kg',cap,vol);
+    }
+  };
+  $('q-clear').onclick=()=>{
+    ['d-cap','d-dose','d-vol','e-agua','c-cap','c-conc','c-vol'].forEach(i=>$(i).value='');
+    $('e-area').value='100';
+    $('e-res').textContent='Resultado: --';
+    $('q-res').textContent='Quantidade por depósito: --';
+  };
+
+  // Ensaio em branco: volume (L/ha) = água * 10000 / área
+  $('e-calc').onclick=()=>{
+    const a=num($('e-agua')),m2=num($('e-area'));
+    if(!ok(a,m2)){ $('e-res').innerHTML=err('Introduza a água gasta e a área do ensaio.'); return; }
+    const v=a*10000/m2;
+    $('e-res').innerHTML='Débito do pulverizador, <i>Dp</i>: <strong>'+nf(v,1)+' L/ha</strong>';
+    $('d-vol').value=nf(v,1);
+    $('c-vol').value=nf(v,1);
+  };
+
+  document.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('q-calc').click(); }));
+})();
+</script>
+</body>
+</html>

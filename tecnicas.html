@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Técnicas de Aplicação — AgroFito</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Ccircle cx='26' cy='26' r='26' fill='%230f3d22'/%3E%3Cpath d='M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z' fill='%237cb83a'/%3E%3C/svg%3E">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f3d22">
+<meta name="description" content="Resumo e calculadoras dos métodos Leaf Wall Area (LWA) e Tree-Row Volume (TRV) para ajustar a calda em pomares e vinhas.">
+<meta name="author" content="Francisco Cabral">
+<style>
+:root{--g1:#0f3d22;--g2:#1a5c35;--g3:#2d7a4f;--lime:#7cb83a;--lime2:#c5e89a;--cream:#f4f0e8;--paper:#fdfaf4;--ink:#18180f;--muted:#6b6b5a;--border:#d6d0c4;--tag-bg:#e6f2da;--tag-fg:#1a5c35}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 100%);padding:.75rem 2rem;display:flex;align-items:center;gap:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+.logo-svg{width:38px;height:38px;flex-shrink:0}
+.logo-text h1{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
+.logo-text h1 span{font-weight:300;opacity:.85}
+.logo-text p{font-size:.72rem;color:var(--lime2);margin-top:.15rem;letter-spacing:.02em}
+.back{margin-left:auto;color:#fff;font-size:.8rem;text-decoration:none;border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:.4rem .8rem}
+.back:hover{background:rgba(255,255,255,.12)}
+.hero{background:linear-gradient(180deg,var(--g2) 0%,var(--g3) 100%);padding:1.5rem 2rem;text-align:center;color:#fff}
+.hero h2{font-size:1.45rem;font-weight:700;margin-bottom:.35rem;letter-spacing:-.02em}
+.hero p{font-size:.85rem;opacity:.85;max-width:600px;margin:0 auto;line-height:1.5}
+main{flex:1;padding:1.25rem 1rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.tab{font:inherit;font-size:.85rem;font-weight:600;padding:.5rem 1.1rem;border-radius:999px;border:1.5px solid var(--border);background:var(--paper);color:var(--g2);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--g2);color:#fff;border-color:var(--g2)}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.card{background:var(--paper);border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;width:100%;max-width:900px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.card[hidden]{display:none}
+.card h3{font-size:1.2rem;color:var(--g2);margin-bottom:.2rem}
+.card h4{font-size:.95rem;color:var(--g2);margin:1.1rem 0 .4rem}
+.sub{font-size:.78rem;color:var(--muted);margin-bottom:.8rem}
+.card p,.card li{font-size:.88rem;line-height:1.6;max-width:72ch}
+.card ul,.card ol{padding-left:1.4rem;margin:.3rem 0}
+.card li+li{margin-top:.25rem}
+.banner{position:relative;margin:.6rem 0 1.1rem;border-radius:10px;overflow:hidden;aspect-ratio:4/1;background:var(--g1)}
+.banner img{width:100%;height:100%;object-fit:cover;object-position:50% 62%;display:block}
+.banner span{position:absolute;right:.6rem;bottom:.5rem;font-size:.68rem;color:#fff;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:10px}
+figcaption{font-size:.74rem;color:var(--muted);margin-top:.45rem;line-height:1.45}
+.lead{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:1.1rem}
+.lead p{max-width:none}
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:1rem;align-items:stretch;margin-bottom:1rem}
+figure{margin:0;background:#fff;border:1px solid var(--border);border-radius:10px;padding:.6rem;display:flex;flex-direction:column}
+figure img{width:100%;height:auto;display:block;border-radius:6px}
+.formula-box{background:#fff;border:1px solid var(--border);border-left:4px solid var(--lime);border-radius:10px;padding:1rem 1.2rem;display:flex;flex-direction:column;justify-content:center}
+.formula-box h4{margin:0 0 .6rem}
+.formula-box img{display:block;width:100%;max-width:340px;height:auto;margin:0 auto .8rem}
+.formula-box .legend{font-size:.82rem;line-height:1.65}
+.formula-box .legend b{color:var(--g1)}
+.cols,.cols3{display:grid;gap:1rem;margin-bottom:1rem;align-items:stretch}
+.cols{grid-template-columns:1fr 1fr}
+.cols3{grid-template-columns:repeat(3,1fr)}
+.cols>div,.cols3>div{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem}
+.cols h4,.cols3 h4{margin:0 0 .5rem}
+.cols p,.cols3 p{margin-top:.6rem}
+.cols h4+p,.cols3 h4+p{margin-top:0}
+.cols .formula,.cols3 .formula{margin:.7rem 0 0}
+.cols .formula code,.cols3 .formula code{white-space:normal}
+@media(max-width:900px){.cols3{grid-template-columns:1fr}}
+@media(max-width:720px){.lead,.split,.cols{grid-template-columns:1fr}}
+.formula{background:var(--tag-bg);border-left:4px solid var(--lime);border-radius:6px;padding:.7rem .9rem;margin:.6rem 0;font-size:.9rem}
+.formula code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:600;color:var(--g1)}
+.formula small{display:block;margin-top:.3rem;font-size:.75rem;color:var(--muted);line-height:1.5}
+.calc{background:#fff;border:1.5px solid var(--lime);border-radius:10px;padding:1.1rem;margin-top:1.1rem}
+.calc h4{margin-top:0}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin:.7rem 0}
+label{display:block;font-size:.76rem;font-weight:600;color:var(--g2);margin-bottom:.25rem}
+input,select{width:100%;font:inherit;font-size:.9rem;padding:.5rem .6rem;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);color:var(--ink)}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{font:inherit;font-size:.82rem;font-weight:600;padding:.5rem 1rem;border-radius:7px;border:none;cursor:pointer;background:var(--g2);color:#fff}
+.btn:hover{background:var(--g3)}
+.btn.sec{background:transparent;color:var(--g2);border:1.5px solid var(--g2)}
+.result{margin-top:.9rem;padding:.8rem 1rem;background:var(--tag-bg);border-radius:8px;font-size:.9rem;min-height:2.6rem}
+.result strong{font-size:1.25rem;color:var(--g1)}
+.result .err{color:#9a1c1c;font-weight:600}
+.result .extra{display:block;font-size:.76rem;color:var(--muted);margin-top:.25rem}
+.warn{background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem .9rem;font-size:.78rem;color:#7a5200;line-height:1.5;margin-top:.9rem}
+.notice-bar{max-width:900px;width:100%;background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem 1rem;font-size:.76rem;color:#7a5200;line-height:1.5}
+.attribution{background:var(--g1);color:rgba(255,255,255,.75);padding:.75rem 2rem;text-align:center;font-size:.72rem;line-height:1.6}
+.attribution a{color:var(--lime2);text-decoration:underline}
+.attribution strong{color:#fff}
+@media(max-width:600px){header{padding:.75rem 1rem}.hero h2{font-size:1.2rem}.card{padding:1rem}.logo-text h1{font-size:1.1rem}.back{padding:.35rem .6rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.eq{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;white-space:nowrap;gap:.45rem;font-family:"Cambria Math",Cambria,Georgia,serif;font-size:1.3rem;font-weight:600;color:var(--g1);margin:.2rem 0 .9rem}
+.eq .fr{display:inline-flex;flex-direction:column;align-items:center}
+.eq .fr>span:first-child{border-bottom:2px solid var(--g1);padding:0 .4rem .12rem}
+.eq .fr>span:last-child{padding-top:.12rem}
+.eq-t{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin:.3rem 0 0}
+.eq.sm{font-size:1rem;margin:.1rem 0 .2rem}
+.formula .eq{margin:0}
+.formula small{display:block;text-align:center;margin-top:.4rem}
+.eq-r{text-align:center;font-family:"Cambria Math",Cambria,Georgia,serif;font-weight:700;font-size:1.02rem;color:var(--g1);margin:.15rem 0 .1rem}
+.ul-cols{columns:3;column-gap:1.4rem;padding-left:1.2rem}
+.ul-cols li{break-inside:avoid;margin-bottom:.6rem}
+@media(max-width:900px){.ul-cols{columns:1}}
+@media(max-width:480px){.eq{font-size:1.1rem}.eq.sm{font-size:.9rem}}
+@media(max-width:600px){
+input,select{font-size:16px;min-height:44px}
+.btn,.tab{min-height:44px}
+.back{padding:.65rem .85rem}
+summary{padding:.55rem 0;font-size:.85rem}
+.info{position:relative}
+.info::after{content:"";position:absolute;inset:-14px}
+}
+.home{display:flex;align-items:center;gap:1.25rem;color:inherit;text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+<a class="home" href="index.html" aria-label="AgroFito: página inicial"><svg class="logo-svg" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="26" cy="26" r="26" fill="rgba(255,255,255,.12)"/>
+<path d="M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z" fill="#7cb83a"/>
+<line x1="26" y1="10" x2="26" y2="42" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="16" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="36" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div class="logo-text">
+<h1><span>Agro</span>Fito</h1>
+<p>Técnicas de Aplicação</p>
+</div></a>
+<a class="back" href="index.html">Início</a>
+</header>
+
+<div class="hero">
+<h2>Técnicas de Aplicação</h2>
+<p>Determinação de volume de calda a pulverizar em pomares e vinhas por Leaf Wall Area (LWA) e Tree-Row Volume (TRV).</p>
+</div>
+
+<main>
+<div class="tabs" role="tablist" aria-label="Métodos">
+<button class="tab" role="tab" id="tab-lwa" aria-selected="true" aria-controls="p-lwa">Leaf Wall Area (LWA)</button>
+<button class="tab" role="tab" id="tab-trv" aria-selected="false" aria-controls="p-trv">Tree-Row Volume (TRV)</button>
+</div>
+
+<!-- ============ LWA ============ -->
+<section class="card" id="p-lwa" role="tabpanel" aria-labelledby="tab-lwa">
+<h3>Leaf Wall Area (LWA)</h3>
+<p class="sub">Área de parede foliar tratada, em m²/ha</p>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-pomar.svg'" src="img/banner-pomar.svg" alt="Trator a pulverizar um pomar em flor" loading="lazy"></div>
+
+<div class="lead">
+<p>O LWA (Leaf Wall Area) permite determinar com mais precisão o volume de calda a pulverizar em culturas tridimensionais, como pomares e vinhas. Determina a área de parede foliar a tratar, tendo em conta a estrutura real da cultura.</p>
+<p>É relevante porque permite ajustar a aplicação dos produtos fitofarmacêuticos para reduzir o desperdício de calda e produto fitofarmacêutico. Funciona melhor em culturas com parede foliar bem definida e sem falhas na vegetação.</p>
+</div>
+
+<div class="split">
+<figure><img onerror="this.onerror=null;this.src='lwa.jpg'" src="img/lwa.jpg" alt="Esquema da parede foliar numa vinha, com altura h, comprimento de linha L e distância entre linhas d" loading="lazy"><figcaption><b><i>h</i></b> é a altura da parede de folhas, <b><i>L</i></b> o comprimento da linha e <b><i>d</i></b> a distância entre linhas. O LWA soma as duas faces de cada linha.</figcaption></figure>
+<div class="formula-box">
+<h4>Como se calcula</h4>
+<div class="eq"><span>LWA =</span><span class="fr"><span>2 × <i>h</i> × 10 000</span><span><i>d</i></span></span></div>
+<div class="legend"><b>LWA</b>: área de parede foliar (m²/ha)<br><b><i>h</i></b>: altura da copa (m)<br><b><i>d</i></b>: distância entrelinha (m)<br>O fator 2 conta as duas faces da parede e 10 000 é o número de m² num hectare. Na imagem, <i>L</i> é o comprimento da linha: por hectare, <i>L</i> = 10 000 ÷ <i>d</i>.</div>
+</div>
+</div>
+
+<div class="cols3">
+<div>
+<h4>Exemplo prático numa vinha</h4>
+<ol>
+<li><b>Altura da copa:</b> medir do ponto mais alto da copa à parte inferior da copa. <b>Exemplo: 2,5 m.</b></li>
+<li><b>Distância entrelinha:</b> medir a distância horizontal entre as duas filas. <b>Exemplo: 3 m.</b></li>
+<li><b>Cálculo:</b> aplicar a fórmula do LWA.</li>
+</ol>
+<div class="formula"><div class="eq sm"><span>LWA =</span><span class="fr"><span>2 × 2,5 × 10 000</span><span>3</span></span></div><div class="eq-r">≈ 16 666,7 m²/ha</div></div>
+<p>Cada hectare de vinha tem cerca de 16 666,7 m² de parede foliar a tratar, valor que serve para determinar o volume de calda.</p>
+</div>
+<div>
+<h4>Vantagens</h4>
+<ul>
+<li>Aplicação mais eficiente dos produtos, porque está ajustada à area a tratar.</li>
+<li>Uso eficiente de fitofarmacêuticos, com ganhos de sustentabilidade ambiental e económica.</li>
+<li>Cálculo simples e acessível.</li>
+</ul>
+</div>
+<div>
+<h4>Limitações</h4>
+<ul>
+<li>A precisão depende de uma parede foliar bem definida. Falhas na vegetação comprometem o cálculo e podem levar a cálculos imprecisos.</li>
+<li>Pode não servir a todas as culturas. Estruturas irregulares ou complexas e pomares antigos, com copas mais redondas, podem precisar de ajustes.</li>
+</ul>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora LWA</h4>
+<div class="fields">
+<div><label for="lwa-h">Altura da copa, <i>h</i> (m)</label><input id="lwa-h" type="text" inputmode="decimal" placeholder="ex.: 2,5"></div>
+<div><label for="lwa-d">Distância entrelinha, <i>d</i> (m)</label><input id="lwa-d" type="text" inputmode="decimal" placeholder="ex.: 3"></div>
+</div>
+<div class="actions">
+<button class="btn" id="lwa-calc">Calcular</button>
+<button class="btn sec" id="lwa-clear">Limpar</button>
+</div>
+<div class="result" id="lwa-res" aria-live="polite">Resultado: --</div>
+</div>
+</section>
+
+<!-- ============ TRV ============ -->
+<section class="card" id="p-trv" role="tabpanel" aria-labelledby="tab-trv" hidden>
+<h3>Tree-Row Volume (TRV)</h3>
+<p class="sub">Volume de calda adequado ao volume de copa, em L/ha</p>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-pomar.svg'" src="img/banner-pomar.svg" alt="Trator a pulverizar um pomar em flor" loading="lazy"></div>
+
+<div class="lead">
+<p>O Tree-Row Volume (TRV) permite determinar a quantidade de calda a aplicar, adequado ao volume de copa a tratar.</p>
+<p>É útil porque as características do pomar variam, nomeadamente o sistema de condução (altura e largura da copa) e a distância entrelinha. Otimiza-se o uso de fitofarmacêuticos e reduzem-se os impactos da aplicação.</p>
+</div>
+
+<div class="split">
+<figure><img onerror="this.onerror=null;this.src='trv.jpg'" src="img/trv.jpg" alt="Esquema do volume de copa com altura h, largura L e distância entre linhas d" loading="lazy"><figcaption>A faixa verde é o volume de copa a tratar (<b><i>h</i></b> × <b><i>L</i></b>). A distância <b><i>d</i></b> define quantos metros de linha há por hectare.</figcaption></figure>
+<div class="formula-box">
+<h4>Como se calcula</h4>
+<div class="eq"><span>TRV =</span><span class="fr"><span><i>h</i> × <i>L</i></span><span><i>d</i></span></span><span>× 10 000 × <i>k</i></span></div>
+<div class="legend"><b>TRV</b>: débito do pulverizador (L/ha)<br><b><i>h</i></b>: altura da copa (m)<br><b><i>L</i></b>: largura da copa (m)<br><b><i>d</i></b>: distância entrelinha (m)<br><b><i>k</i></b>: litros de calda por m³ de copa (L/m³)</div>
+</div>
+</div>
+
+<div class="cols">
+<div>
+<h4>Valor de <i>k</i></h4>
+<p>O <i>k</i> é o volume de calda pulverizado por m³ de copa que se presume dar uma cobertura biologicamente eficaz, e deve ser escolhido segundo as características do pomar.</p>
+<ul>
+<li>Doruchowski et al. (2012): <i>k</i> = 0,033 L/m³, em pomares da Polónia, com ensaios de diferentes métodos de aplicação.</li>
+<li>Sousa e Soares (2004, p. 112): coberturas de 20 a 60 L de calda por 1000 m³ de copa (0,020 a 0,060 L/m³), com resultados de um estudo na região Oeste.</li>
+</ul>
+</div>
+<div>
+<h4>Exemplo prático</h4>
+<p>Pomar com copa de 2 m de altura (<i>h</i>) e 3 m de largura (<i>L</i>), e entrelinha de 4 m (<i>d</i>), com o valor máximo de <i>k</i> de Sousa e Soares (0,060 L/m³).</p>
+<ol>
+<li><b>Volume de copa:</b> 2 × 3 × 10 000 ÷ 4 = 15 000 m³/ha.</li>
+<li><b>Volume de calda:</b> 15 000 × 0,060 = <b>900 L/ha</b>.</li>
+</ol>
+<div class="formula"><div class="eq sm"><span>TRV =</span><span class="fr"><span>2 × 3</span><span>4</span></span><span>× 10 000 × 0,060</span></div><div class="eq-r">= 900 L/ha</div></div>
+</div>
+</div>
+
+<div class="cols">
+<div>
+<h4>Vantagens</h4>
+<ul>
+<li><b>Maior precisão:</b> a calda é ajustada a cada pomar, otimizando o uso de produto e reduzindo o risco de deriva e contaminação.</li>
+<li><b>Melhor cobertura:</b> com os valores de <i>k</i> dos estudos citados, a calda distribui-se de forma mais uniforme na copa.</li>
+<li><b>Redução de custos</b> com produtos fitofarmacêuticos.</li>
+<li><b>Menor impacto ambiental:</b> menos risco para o solo e a água e menos resíduos.</li>
+</ul>
+</div>
+<div>
+<h4>Limitações</h4>
+<ul>
+<li>Com o desenvolvimento fenológico da cultura (copa mais densa) é necessário ajustar o volume de calda.</li>
+<li>A intensidade de ataque influenciam a quantidade necessária.</li>
+<li>O objetivo é não aplicar mais do que o necessário, mantendo um controlo aceitável das pragas.</li>
+</ul>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora TRV</h4>
+<div class="fields">
+<div><label for="trv-h">Altura da copa, <i>h</i> (m)</label><input id="trv-h" type="text" inputmode="decimal" placeholder="ex.: 2"></div>
+<div><label for="trv-l">Largura da copa, <i>L</i> (m)</label><input id="trv-l" type="text" inputmode="decimal" placeholder="ex.: 3"></div>
+<div><label for="trv-d">Distância entrelinha, <i>d</i> (m)</label><input id="trv-d" type="text" inputmode="decimal" placeholder="ex.: 4"></div>
+<div>
+<label for="trv-kp">Valor de <i>k</i> de referência</label>
+<select id="trv-kp">
+<option value="0.033">0,033 L/m³ (Doruchowski)</option>
+<option value="0.020">0,020 L/m³ (Sousa e S. min.)</option>
+<option value="0.060">0,060 L/m³ (Sousa e S. máx.)</option>
+<option value="custom">Outro valor</option>
+</select>
+</div>
+<div><label for="trv-k"><i>k</i> (L/m³)</label><input id="trv-k" type="text" inputmode="decimal" value="0,033"></div>
+</div>
+<div class="actions">
+<button class="btn" id="trv-calc">Calcular</button>
+<button class="btn sec" id="trv-clear">Limpar</button>
+</div>
+<div class="result" id="trv-res" aria-live="polite">Resultado: --</div>
+</div>
+</section>
+</main>
+
+<div class="attribution">
+<p style="margin-top:.4rem;opacity:.8">Projeto independente, sem afiliação com a DGAV nem a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> · © 2026</p>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const nf = (v, d) => v.toLocaleString('pt-PT', {minimumFractionDigits:d, maximumFractionDigits:d});
+  const num = el => parseFloat(String(el.value).trim().replace(/\s/g,'').replace(',', '.'));
+  const bad = (...v) => v.some(x => !isFinite(x) || x <= 0);
+
+  /* Separadores */
+  const tabs = {lwa:[$('tab-lwa'),$('p-lwa')], trv:[$('tab-trv'),$('p-trv')]};
+  function show(k){
+    for(const key in tabs){
+      const on = key===k;
+      tabs[key][0].setAttribute('aria-selected', on);
+      tabs[key][1].hidden = !on;
+    }
+    history.replaceState(null,'','#'+k);
+  }
+  tabs.lwa[0].onclick = () => show('lwa');
+  tabs.trv[0].onclick = () => show('trv');
+  const h0 = location.hash.replace('#','');
+  if(h0==='trv') show('trv');
+
+  /* LWA = 2 * h * 10000 / d */
+  $('lwa-calc').onclick = () => {
+    const h = num($('lwa-h')), d = num($('lwa-d')), out = $('lwa-res');
+    if(bad(h,d)){ out.innerHTML = '<span class="err">Introduza valores positivos para a altura da copa e a distância entrelinha.</span>'; return; }
+    const lwa = 2*h*10000/d;
+    out.innerHTML = 'LWA: <strong>' + nf(lwa,1) + ' m²/ha</strong>';
+  };
+  $('lwa-clear').onclick = () => { $('lwa-h').value=''; $('lwa-d').value=''; $('lwa-res').textContent='Resultado: --'; };
+
+  /* TRV = (h * L * 10000 / d) * k */
+  const kSel = $('trv-kp'), kIn = $('trv-k');
+  kSel.onchange = () => {
+    if(kSel.value !== 'custom'){ kIn.value = nf(parseFloat(kSel.value),3); }
+    else { kIn.focus(); kIn.select(); }
+  };
+  kIn.oninput = () => { kSel.value = 'custom'; };
+
+  $('trv-calc').onclick = () => {
+    const h = num($('trv-h')), L = num($('trv-l')), d = num($('trv-d')), k = num(kIn), out = $('trv-res');
+    if(bad(h,L,d,k)){ out.innerHTML = '<span class="err">Introduza valores positivos em todos os campos.</span>'; return; }
+    const vol = h*L*10000/d;
+    const trv = vol*k;
+    out.innerHTML = 'TRV: <strong>' + nf(trv,0) + ' L/ha</strong>' +
+      '<span class="extra">Volume de copa: ' + nf(vol,0) + ' m³/ha · <i>k</i> = ' + nf(k,3) + ' L/m³</span>';
+  };
+  $('trv-clear').onclick = () => {
+    ['trv-h','trv-l','trv-d'].forEach(i => $(i).value='');
+    kSel.value='0.033'; kIn.value='0,033';
+    $('trv-res').textContent='Resultado: --';
+  };
+
+  /* Enter calcula */
+  ['lwa-h','lwa-d'].forEach(i => $(i).addEventListener('keydown', e => { if(e.key==='Enter') $('lwa-calc').click(); }));
+  ['trv-h','trv-l','trv-d','trv-k'].forEach(i => $(i).addEventListener('keydown', e => { if(e.key==='Enter') $('trv-calc').click(); }));
+})();
+</script>
+</body>
+</html>

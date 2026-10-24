@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volume de Calda — AgroFito</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Ccircle cx='26' cy='26' r='26' fill='%230f3d22'/%3E%3Cpath d='M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z' fill='%237cb83a'/%3E%3C/svg%3E">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f3d22">
+<meta name="description" content="Calculadora do volume de calda (L/ha) a partir do débito, da velocidade de avanço e da largura de trabalho ou entrelinha, em culturas baixas e em pomares e vinhas.">
+<meta name="author" content="Francisco Cabral">
+<style>
+:root{--g1:#0f3d22;--g2:#1a5c35;--g3:#2d7a4f;--lime:#7cb83a;--lime2:#c5e89a;--cream:#f4f0e8;--paper:#fdfaf4;--ink:#18180f;--muted:#6b6b5a;--border:#d6d0c4;--tag-bg:#e6f2da;--tag-fg:#1a5c35}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 100%);padding:.75rem 2rem;display:flex;align-items:center;gap:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+.logo-svg{width:38px;height:38px;flex-shrink:0}
+.logo-text h1{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
+.logo-text h1 span{font-weight:300;opacity:.85}
+.logo-text p{font-size:.72rem;color:var(--lime2);margin-top:.15rem;letter-spacing:.02em}
+.back{margin-left:auto;color:#fff;font-size:.8rem;text-decoration:none;border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:.4rem .8rem}
+.back:hover{background:rgba(255,255,255,.12)}
+.hero{background:linear-gradient(180deg,var(--g2) 0%,var(--g3) 100%);padding:1.5rem 2rem;text-align:center;color:#fff}
+.hero h2{font-size:1.45rem;font-weight:700;margin-bottom:.35rem;letter-spacing:-.02em}
+.hero p{font-size:.85rem;opacity:.85;max-width:600px;margin:0 auto;line-height:1.5}
+main{flex:1;padding:1.25rem 1rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.tab{font:inherit;font-size:.85rem;font-weight:600;padding:.5rem 1.1rem;border-radius:999px;border:1.5px solid var(--border);background:var(--paper);color:var(--g2);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--g2);color:#fff;border-color:var(--g2)}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.card{background:var(--paper);border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;width:100%;max-width:900px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.card[hidden]{display:none}
+.card h3{font-size:1.2rem;color:var(--g2);margin-bottom:.2rem}
+.card h4{font-size:.95rem;color:var(--g2);margin:1.1rem 0 .4rem}
+.sub{font-size:.78rem;color:var(--muted);margin-bottom:.8rem}
+.card p,.card li{font-size:.88rem;line-height:1.6;max-width:72ch}
+.card ul,.card ol{padding-left:1.4rem;margin:.3rem 0}
+.card li+li{margin-top:.25rem}
+.banner{position:relative;margin:.6rem 0 1.1rem;border-radius:10px;overflow:hidden;aspect-ratio:4/1;background:var(--g1)}
+.banner img{width:100%;height:100%;object-fit:cover;object-position:50% 62%;display:block}
+.banner span{position:absolute;right:.6rem;bottom:.5rem;font-size:.68rem;color:#fff;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:10px}
+figcaption{font-size:.74rem;color:var(--muted);margin-top:.45rem;line-height:1.45}
+.lead{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:1.1rem}
+.lead p{max-width:none}
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:1rem;align-items:stretch;margin-bottom:1rem}
+figure{margin:0;background:#fff;border:1px solid var(--border);border-radius:10px;padding:.6rem;display:flex;flex-direction:column}
+figure img{width:100%;height:auto;display:block;border-radius:6px}
+.formula-box{background:#fff;border:1px solid var(--border);border-left:4px solid var(--lime);border-radius:10px;padding:1rem 1.2rem;display:flex;flex-direction:column;justify-content:center}
+.formula-box h4{margin:0 0 .6rem}
+.formula-box img{display:block;width:100%;max-width:340px;height:auto;margin:0 auto .8rem}
+.formula-box .legend{font-size:.82rem;line-height:1.65}
+.formula-box .legend b{color:var(--g1)}
+.cols,.cols3{display:grid;gap:1rem;margin-bottom:1rem;align-items:stretch}
+.cols{grid-template-columns:1fr 1fr}
+.cols3{grid-template-columns:repeat(3,1fr)}
+.cols>div,.cols3>div{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem}
+.cols h4,.cols3 h4{margin:0 0 .5rem}
+.cols p,.cols3 p{margin-top:.6rem}
+.cols h4+p,.cols3 h4+p{margin-top:0}
+.cols .formula,.cols3 .formula{margin:.7rem 0 0}
+.cols .formula code,.cols3 .formula code{white-space:normal}
+@media(max-width:900px){.cols3{grid-template-columns:1fr}}
+@media(max-width:720px){.lead,.split,.cols{grid-template-columns:1fr}}
+.formula{background:var(--tag-bg);border-left:4px solid var(--lime);border-radius:6px;padding:.7rem .9rem;margin:.6rem 0;font-size:.9rem}
+.formula code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:600;color:var(--g1)}
+.formula small{display:block;margin-top:.3rem;font-size:.75rem;color:var(--muted);line-height:1.5}
+.calc{background:#fff;border:1.5px solid var(--lime);border-radius:10px;padding:1.1rem;margin-top:1.1rem}
+.calc h4{margin-top:0}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin:.7rem 0}
+label{display:block;font-size:.76rem;font-weight:600;color:var(--g2);margin-bottom:.25rem}
+input,select{width:100%;font:inherit;font-size:.9rem;padding:.5rem .6rem;border:1.5px solid var(--border);border-radius:7px;background:var(--paper);color:var(--ink)}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{font:inherit;font-size:.82rem;font-weight:600;padding:.5rem 1rem;border-radius:7px;border:none;cursor:pointer;background:var(--g2);color:#fff}
+.btn:hover{background:var(--g3)}
+.btn.sec{background:transparent;color:var(--g2);border:1.5px solid var(--g2)}
+.result{margin-top:.9rem;padding:.8rem 1rem;background:var(--tag-bg);border-radius:8px;font-size:.9rem;min-height:2.6rem}
+.result strong{font-size:1.25rem;color:var(--g1)}
+.result .err{color:#9a1c1c;font-weight:600}
+.result .extra{display:block;font-size:.76rem;color:var(--muted);margin-top:.25rem}
+.warn{background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem .9rem;font-size:.78rem;color:#7a5200;line-height:1.5;margin-top:.9rem}
+.notice-bar{max-width:900px;width:100%;background:#fff8e1;border:1.5px solid #f5d060;border-radius:8px;padding:.6rem 1rem;font-size:.76rem;color:#7a5200;line-height:1.5}
+.attribution{background:var(--g1);color:rgba(255,255,255,.75);padding:.75rem 2rem;text-align:center;font-size:.72rem;line-height:1.6}
+.attribution a{color:var(--lime2);text-decoration:underline}
+.attribution strong{color:#fff}
+@media(max-width:600px){header{padding:.75rem 1rem}.hero h2{font-size:1.2rem}.card{padding:1rem}.logo-text h1{font-size:1.1rem}.back{padding:.35rem .6rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.cols1{display:grid;gap:1rem;margin-bottom:1rem}
+details{margin-top:.8rem;border:1px solid var(--border);border-radius:8px;background:var(--paper);padding:.6rem .8rem}
+summary{cursor:pointer;font-size:.8rem;font-weight:600;color:var(--g2)}
+details[open] summary{margin-bottom:.6rem}
+.modes{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.mode[hidden]{display:none}
+.fields .row2{display:grid;grid-template-columns:1.4fr 1fr;gap:.5rem}
+.eq{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;white-space:nowrap;gap:.45rem;font-family:"Cambria Math",Cambria,Georgia,serif;font-size:clamp(.82rem,3.7vw,1.3rem);font-weight:600;color:var(--g1);margin:.2rem 0 .9rem}
+.eq .fr{display:inline-flex;flex-direction:column;align-items:center}
+.eq .fr>span:first-child{border-bottom:2px solid var(--g1);padding:0 .4rem .12rem}
+.eq .fr>span:last-child{padding-top:.12rem}
+.eq-t{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin:.3rem 0 0}
+.eq.sm{font-size:clamp(.8rem,3.4vw,1rem);margin:.1rem 0 .2rem}
+.formula .eq{margin:0}
+.formula small{display:block;text-align:center;margin-top:.4rem}
+.eq-r{text-align:center;font-family:"Cambria Math",Cambria,Georgia,serif;font-weight:700;font-size:1.02rem;color:var(--g1);margin:.15rem 0 .1rem}
+.ul-cols{columns:3;column-gap:1.4rem;padding-left:1.2rem}
+.ul-cols li{break-inside:avoid;margin-bottom:.6rem}
+@media(max-width:900px){.ul-cols{columns:1}}
+.eq sub,.legend sub{font-size:.62em;vertical-align:baseline;position:relative;top:.3em;margin-left:.04em}
+.eq sup{font-size:.62em;vertical-align:baseline;position:relative;top:-.6em}
+.eq .pr{font-size:2.1em;font-weight:300;line-height:.5;margin:0 -.12em}
+.formula-box.wide{margin-bottom:1rem}
+.formula-box.wide .legend{columns:2;column-gap:2rem}
+.formula-box.wide .legend>div{break-inside:avoid;margin-bottom:.3rem}
+@media(max-width:720px){.formula-box.wide .legend{columns:1}}
+.sec-note{font-size:.78rem;color:var(--muted);margin-top:.6rem}
+.info{display:inline-flex;align-items:center;justify-content:center;width:1.15rem;height:1.15rem;margin-left:.2rem;padding:0;border-radius:50%;border:1.5px solid var(--g2);background:#fff;color:var(--g2);font:700 .72rem/1 ui-sans-serif,system-ui,sans-serif;font-style:normal;vertical-align:super;cursor:pointer}
+.info:hover,.info[aria-expanded="true"]{background:var(--g2);color:#fff}
+.pop{position:absolute;z-index:60;width:min(360px,92vw);background:#fff;border:1.5px solid var(--g2);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.22);padding:.85rem 2rem .85rem 1rem;font:400 .82rem/1.55 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);white-space:normal;text-align:left}
+.pop[hidden]{display:none}
+.pop h5{font-size:.88rem;color:var(--g2);margin:0 0 .35rem}
+.pop p{margin:.35rem 0}
+.pop i{font-family:"Cambria Math",Cambria,Georgia,serif;font-size:1.05em}
+.pop-x{position:absolute;top:.35rem;right:.5rem;border:none;background:none;font-size:1.3rem;line-height:1;color:var(--muted);cursor:pointer}
+.pop::before{content:"";position:absolute;top:-8px;left:calc(var(--ax,50%) - 7px);width:12px;height:12px;background:#fff;border-left:1.5px solid var(--g2);border-top:1.5px solid var(--g2);transform:rotate(45deg)}
+.pop.up::before{top:auto;bottom:-8px;transform:rotate(225deg)}
+@media(max-width:600px){
+input,select{font-size:16px;min-height:44px}
+.btn,.tab{min-height:44px}
+.back{padding:.65rem .85rem}
+summary{padding:.55rem 0;font-size:.85rem}
+.info{position:relative}
+.info::after{content:"";position:absolute;inset:-14px}
+}
+.home{display:flex;align-items:center;gap:1.25rem;color:inherit;text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+<a class="home" href="index.html" aria-label="AgroFito: página inicial"><svg class="logo-svg" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="26" cy="26" r="26" fill="rgba(255,255,255,.12)"/>
+<path d="M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z" fill="#7cb83a"/>
+<line x1="26" y1="10" x2="26" y2="42" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="16" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+<line x1="26" y1="18" x2="36" y2="24" stroke="rgba(255,255,255,.25)" stroke-width="1" stroke-linecap="round"/>
+</svg>
+<div class="logo-text">
+<h1><span>Agro</span>Fito</h1>
+<p>Volume de Calda</p>
+</div></a>
+<a class="back" href="index.html">Início</a>
+</header>
+
+<div class="hero">
+<h2>Volume de Calda</h2>
+<p>Calculadoras para determinar o volume de calda num pulverizador.</p>
+</div>
+
+<main>
+<div class="tabs" role="tablist" aria-label="Calculadoras de pulverização">
+<button class="tab" role="tab" id="tab-deb" aria-selected="true" aria-controls="p-deb">Débito do Pulverizador</button>
+<button class="tab" role="tab" id="tab-bicos" aria-selected="false" aria-controls="p-bicos">Débito dos Bicos</button>
+<button class="tab" role="tab" id="tab-vel" aria-selected="false" aria-controls="p-vel">Velocidade de Pulverização</button>
+<button class="tab" role="tab" id="tab-pressao" aria-selected="false" aria-controls="p-pressao">Pressão de Trabalho</button>
+</div>
+
+<section class="card" id="p-deb" role="tabpanel" aria-labelledby="tab-deb">
+<h3>Débito do pulverizador</h3>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-barra.svg'" src="img/banner-barra.svg" alt="Pulverizador de barra a tratar uma cultura baixa" loading="lazy"></div>
+
+<div class="lead">
+<p>A determinação do volume de calda é uma etapa decisiva na aplicação de produtos fitofarmacêuticos, porque influencia a eficácia do tratamento e a distribuição uniforme do produto nas plantas. Calculá-lo com precisão ajuda a evitar sub e sobredosagens.</p>
+<p>Este guia apresenta os parâmetros do cálculo, as formulas de cálculo e respetivos ajustes necessários.</p>
+</div>
+
+<div class="split">
+<figure style="justify-content:center"><picture><source media="(max-width:600px)" srcset="img/parametros-calda-vertical.svg"><img onerror="this.onerror=null;this.parentNode.querySelectorAll('source').forEach(function(x){x.remove()});this.src='parametros-calda.svg'" src="img/parametros-calda.svg" alt="Parâmetros do cálculo: largura de trabalho L, velocidade V e débito de cada bico D" loading="lazy"></picture><figcaption>Parâmetros do cálculo: largura de trabalho (<i>L</i>), velocidade de avanço (<i>V</i>) e débito de cada bico (<i>Db</i>).</figcaption></figure>
+<div class="formula-box">
+<h4>Como se calcula</h4>
+<div class="eq"><span><i>Dp</i> =</span><span class="fr"><span>600<button class="info" type="button" aria-label="Explicação do fator 600" aria-haspopup="dialog" aria-expanded="false">i</button> × <i>Db</i> × <i>n</i></span><span><i>V</i> × <i>L</i></span></span></div>
+<div class="legend"><b><i>Dp</i></b>: débito do pulverizador (L/ha)<br><b><i>Db</i></b>: débito de cada bico (L/min)<br><b><i>n</i></b>: número de bicos<br><b><i>V</i></b>: velocidade de avanço (km/h)<br><b><i>L</i></b>: largura de trabalho (m): a largura da barra nas culturas baixas ou a distância entrelinha em pomares e vinhas.</div>
+</div>
+</div>
+
+<div class="cols" style="grid-template-columns:1fr">
+<div>
+<h4>Considerações importantes</h4>
+<ul class="ul-cols">
+<li><b>Estados fenológicos:</b> o volume de calda deve corresponder ao volume de copa (folha e fruto) a tratar. Culturas mais desenvolvidas pedem mais calda, para uma deposição uniforme. Culturas menos desenvolvidas pedem menos, para evitar perdas por deriva ou escorrimento.</li>
+<li><b>Volumes insuficientes:</b> dão aplicações irregulares e deixam por tratar zonas da copa de difícil acesso, reduzindo a eficácia do produto.</li>
+<li><b>Equipamento:</b> o ventilador, quando existe, deve ser ajustado para não haver excesso de volume ou de velocidade de ar, que leva a calda para longe do alvo. O objetivo é uma cobertura uniforme de gotas na folha e no fruto.</li>
+</ul>
+</div>
+</div>
+
+<div class="cols3">
+<div>
+<h4>Parâmetros</h4>
+<ul>
+<li><b>Débito de cada bico (<i>Db</i>):</b> Débito pulverizado por unidade de tempo em L/min.</li>
+<li><b>Número de bicos (<i>n</i>):</b> bicos em funcionamento.</li>
+<li><b>Velocidade de avanço (<i>V</i>):</b> em km/h. Deve manter-se constante durante a pulverização.</li>
+<li><b>Largura de trabalho (<i>L</i>):</b> em m. Nas culturas baixas é a largura da barra; em pomares e vinhas é a distância entrelinha.</li>
+</ul>
+</div>
+<div>
+<h4>Exemplo: culturas baixas</h4>
+<p>Herbicida para preparar uma parcela para a sementeira de trigo, com <i>Db</i> = 0,5 L/min em cada um dos <i>n</i> = 28 bicos, <i>V</i> = 6 km/h e <i>L</i> = 15 m.</p>
+<div class="formula"><div class="eq sm"><span><i>Dp</i> =</span><span class="fr"><span>600 × 0,5 × 28</span><span>6 × 15</span></span></div><div class="eq-r">= 93,33 L/ha</div></div>
+</div>
+<div>
+<h4>Exemplo: pomar de maçã</h4>
+<p>Fungicida num pomar, com <i>Db</i> = 2 L/min em cada um dos <i>n</i> = 16 bicos, <i>V</i> = 5,6 km/h e distância entrelinha <i>L</i> = 4 m.</p>
+<div class="formula"><div class="eq sm"><span><i>Dp</i> =</span><span class="fr"><span>600 × 2 × 16</span><span>5,6 × 4</span></span></div><div class="eq-r">= 857,14 L/ha</div></div>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora de débito do pulverizador</h4>
+<div class="fields">
+<div><label for="f-tipo">Tipo de cultura</label>
+<select id="f-tipo"><option value="barra">Culturas baixas: pulverizador de barra</option><option value="d3">Culturas 3D: pomares e vinhas</option></select></div>
+<div><label for="f-calc">O que pretende calcular</label>
+<select id="f-calc"><option value="dp">Débito do pulverizador, Dp (L/ha)</option><option value="d">Débito de cada bico, Db (L/min)</option><option value="v">Velocidade de avanço, V (km/h)</option></select></div>
+</div>
+<div class="fields">
+<div id="w-D"><label for="f-D" id="l-D">Débito de cada bico, <i>Db</i> (L/min)</label><input id="f-D" type="text" inputmode="decimal" placeholder="ex.: 0,5"></div>
+<div id="w-n"><label for="f-n">Número de bicos, <i>n</i></label><input id="f-n" type="text" inputmode="decimal" placeholder="ex.: 28"></div>
+<div id="w-v"><label for="f-v">Velocidade de avanço, <i>V</i> (km/h)</label><input id="f-v" type="text" inputmode="decimal" placeholder="ex.: 6"></div>
+<div id="w-W"><label for="f-W" id="l-W">Largura de trabalho, <i>L</i> (m)</label><input id="f-W" type="text" inputmode="decimal" placeholder="ex.: 15"></div>
+<div id="w-DP"><label for="f-DP">Débito do pulverizador pretendido, <i>Dp</i> (L/ha)</label><input id="f-DP" type="text" inputmode="decimal" placeholder="ex.: 93"></div>
+<div id="w-cap"><label for="f-cap">Capacidade do depósito (L), opcional</label><input id="f-cap" type="text" inputmode="decimal" placeholder="ex.: 600"></div>
+</div>
+<div class="actions">
+<button class="btn" id="f-go" type="button">Calcular</button>
+<button class="btn sec" id="f-clear" type="button">Limpar</button>
+</div>
+<div class="result" id="f-res" aria-live="polite">Resultado: --</div>
+</div>
+</section>
+
+<section class="card" id="p-bicos" role="tabpanel" aria-labelledby="tab-bicos" hidden>
+<h3>Débito dos bicos</h3>
+<p class="sub">Determinar o débito necessário por bico (L/min)</p>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-bicos.svg'" src="img/banner-bicos.svg" alt="Bicos de pulverização a aplicar calda sobre a cultura" loading="lazy"></div>
+
+<div class="lead">
+<p>Por vezes é necessário determinar qual o débito que cada bico deve debitar para aplicar um determinado volume de calda por hectare, ou seja, o débito do pulverizador pretendido (<i>Dp</i>).</p>
+<p>Conhecidos o <i>Dp</i>, a velocidade de avanço (<i>V</i>), a largura de trabalho (<i>L</i>) e o número de bicos (<i>n</i>), a fórmula indica o débito necessário por bico (<i>Db</i>), em L/min, valor que serve de referência para escolher os bicos.</p>
+</div>
+
+<div class="formula-box wide">
+<h4>Como se calcula</h4>
+<div class="eq"><span><i>Db</i> =</span><span class="fr"><span><i>V</i> × <i>L</i> × <i>Dp</i></span><span>600<button class="info" type="button" aria-label="Explicação do fator 600" aria-haspopup="dialog" aria-expanded="false">i</button> × <i>n</i></span></span></div>
+<div class="legend"><div><b><i>Db</i></b>: débito necessário por bico (L/min)</div><div><b><i>V</i></b>: velocidade de avanço (km/h)</div><div><b><i>L</i></b>: largura de trabalho (m)</div><div><b><i>Dp</i></b>: débito do pulverizador pretendido (L/ha)</div><div><b><i>n</i></b>: número de bicos</div><div>O débito total dos bicos é <i>Db</i> × <i>n</i> = (<i>V</i> × <i>L</i> × <i>Dp</i>) ÷ 600.</div></div>
+</div>
+
+<div class="cols">
+<div>
+<h4>Exemplo prático</h4>
+<p>Pulverizador de barra com <i>L</i> = 15 m de largura de trabalho e <i>n</i> = 30 bicos, a <i>V</i> = 6 km/h, para aplicar <i>Dp</i> = 200 L/ha.</p>
+<div class="formula"><div class="eq sm"><span><i>Db</i> =</span><span class="fr"><span>6 × 15 × 200</span><span>600 × 30</span></span></div><div class="eq-r">= 1,0 L/min por bico</div></div>
+</div>
+<div>
+<h4>Para ter em conta</h4>
+<ul><li>Verifique o débito de cada bico: diferenças entre bicos, ou um débito cerca de 10 % acima do nominal, indicam desgaste ou entupimento, e esses bicos devem ser substituídos.</li><li>Se o débito de um bico não corresponder ao pretendido, deve-se corrigir, desentupindo, com uma verificação posterior, ou substituir o bico.</li><li>Em pomares e vinhas, <i>n</i> é o número de bicos abertos. Convém distribuir o débito pela altura da copa, em vez de o dividir por igual.</li></ul>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora de débito dos bicos</h4>
+<div class="fields">
+<div><label for="n-v">Velocidade de avanço, <i>V</i> (km/h)</label><input id="n-v" type="text" inputmode="decimal" placeholder="ex.: 6"></div><div><label for="n-L">Largura de trabalho, <i>L</i> (m)</label><input id="n-L" type="text" inputmode="decimal" placeholder="ex.: 15"></div><div><label for="n-DP">Débito do pulverizador pretendido, <i>Dp</i> (L/ha)</label><input id="n-DP" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="n-N">Número de bicos, <i>n</i></label><input id="n-N" type="text" inputmode="decimal" placeholder="ex.: 30"></div>
+</div>
+
+<div class="actions">
+<button class="btn" id="n-go" type="button">Calcular</button>
+<button class="btn sec" id="n-clear" type="button">Limpar</button>
+</div>
+<div class="result" id="n-res" aria-live="polite">Débito por bico: --</div>
+</div>
+</section>
+
+<section class="card" id="p-vel" role="tabpanel" aria-labelledby="tab-vel" hidden>
+<h3>Velocidade de pulverização</h3>
+<p class="sub">Determinar a nova velocidade de avanço (km/h)</p>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-velocidade.svg'" src="img/banner-velocidade.svg" alt="Trator com pulverizador em movimento e indicador de velocidade" loading="lazy"></div>
+
+<div class="lead">
+<p>O débito do pulverizador pretendido (<i>Dp</i>) pode exigir uma velocidade de avanço maior ou menor do que a atual: para aplicar menos calda por hectare é preciso avançar mais depressa, e para aplicar mais é preciso avançar mais devagar.</p>
+<p>Mantendo a pressão e os bicos, a fórmula indica a nova velocidade de avanço (<i>V</i>) necessária para passar do <i>Dp</i> atual para o <i>Dp</i> pretendido.</p>
+</div>
+
+<div class="formula-box wide">
+<h4>Como se calcula</h4>
+<div class="eq"><span><i>V</i><sub>pretendida</sub> =</span><span class="fr"><span><i>Dp</i><sub>atual</sub></span><span><i>Dp</i><sub>pretendido</sub></span></span><span>× <i>V</i><sub>atual</sub></span></div>
+<div class="legend"><div><b><i>V</i><sub>pretendida</sub></b>: nova velocidade de avanço (km/h)</div><div><b><i>V</i><sub>atual</sub></b>: velocidade de avanço atual (km/h)</div><div><b><i>Dp</i><sub>atual</sub></b>: débito do pulverizador atual (L/ha)</div><div><b><i>Dp</i><sub>pretendido</sub></b>: débito do pulverizador pretendido (L/ha)</div><div>Só é válida com a mesma pressão e os mesmos bicos.</div></div>
+</div>
+
+<div class="cols">
+<div>
+<h4>Exemplo prático</h4>
+<p>Pulverizador a aplicar 300 L/ha a 5 km/h, que passa a aplicar 200 L/ha com os mesmos bicos e a mesma pressão.</p>
+<div class="formula"><div class="eq sm"><span><i>V</i><sub>pretendida</sub> =</span><span class="fr"><span>300</span><span>200</span></span><span>× 5</span></div><div class="eq-r">= 7,5 km/h</div></div>
+</div>
+<div>
+<h4>Para ter em conta</h4>
+<ul><li>Meça a velocidade real: percorra uma distância conhecida com o depósito meio cheio e cronometre. <i>V</i> (km/h) = distância (m) ÷ tempo (s) × 3,6.</li><li>Os pulverizadores de débito variável compensam as variações de velocidade. Esta calculadora aplica-se aos de débito constante.</li></ul>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora de velocidade de pulverização</h4>
+<div class="fields">
+<div><label for="s-DPa">Débito do pulverizador atual, <i>Dp</i><sub>atual</sub> (L/ha)</label><input id="s-DPa" type="text" inputmode="decimal" placeholder="ex.: 300"></div><div><label for="s-DPp">Débito do pulverizador pretendido, <i>Dp</i><sub>pretendido</sub> (L/ha)</label><input id="s-DPp" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="s-va">Velocidade atual, <i>V</i><sub>atual</sub> (km/h)</label><input id="s-va" type="text" inputmode="decimal" placeholder="ex.: 5"></div>
+</div>
+<details>
+<summary>Não sei a velocidade atual: calcular por distância e tempo</summary>
+<div class="fields">
+<div><label for="s-dist">Distância percorrida (m)</label><input id="s-dist" type="text" inputmode="decimal" placeholder="ex.: 100"></div><div><label for="s-tempo">Tempo gasto (s)</label><input id="s-tempo" type="text" inputmode="decimal" placeholder="ex.: 72"></div>
+</div>
+<div class="actions"><button class="btn sec" id="s-hcalc" type="button">Usar como velocidade atual</button></div>
+<div class="result" id="s-hres" aria-live="polite">Resultado: --</div>
+</details>
+<div class="actions">
+<button class="btn" id="s-go" type="button">Calcular</button>
+<button class="btn sec" id="s-clear" type="button">Limpar</button>
+</div>
+<div class="result" id="s-res" aria-live="polite">Nova velocidade: --</div>
+</div>
+</section>
+
+<section class="card" id="p-pressao" role="tabpanel" aria-labelledby="tab-pressao" hidden>
+<h3>Pressão de trabalho</h3>
+<p class="sub">Determinar a pressão de pulverização pretendida</p>
+
+<div class="banner"><img onerror="this.onerror=null;this.src='banner-pressao.svg'" src="img/banner-pressao.svg" alt="Manómetro de pressão e bicos a pulverizar" loading="lazy"></div>
+
+<div class="lead">
+<p>A pressão é a energia que faz a calda sair pelo bico e dividir-se em gotas. O débito de um bico é proporcional à raiz quadrada da pressão: para duplicar o débito é preciso quadruplicar a pressão.</p>
+<p>Por isso, a pressão serve para ajustar com rigor o volume de calda, em alterações pequenas. Cada bico tem uma gama de pressões de trabalho indicada pelo fabricante, que deve ser respeitada: pressões altas dão gotas mais finas, com mais risco de deriva e de desgaste, e pressões baixas podem prejudicar a cobertura.</p>
+</div>
+
+<div class="formula-box wide">
+<h4>Como se calcula</h4>
+<div class="eq"><span><i>P</i><sub>pretendida</sub> =</span><span class="pr">(</span><span class="fr"><span><i>Dp</i><sub>pretendido</sub></span><span><i>Dp</i><sub>atual</sub></span></span><span class="pr">)</span><sup>2</sup><span>× <i>P</i><sub>atual</sub></span></div>
+<div class="legend"><div><b><i>P</i><sub>pretendida</sub></b>: pressão de trabalho necessária</div><div><b><i>P</i><sub>atual</sub></b>: pressão de trabalho atual</div><div><b><i>Dp</i><sub>pretendido</sub></b>: débito do pulverizador pretendido (L/ha)</div><div><b><i>Dp</i><sub>atual</sub></b>: débito do pulverizador atual (L/ha)</div><div>A pressão pretendida sai na mesma unidade da atual (bar, kPa ou psi). Só é válida com a mesma velocidade e os mesmos bicos.</div></div>
+</div>
+
+<div class="cols">
+<div>
+<h4>Exemplo prático</h4>
+<p>Pulverizador a aplicar 200 L/ha a 3 bar, que passa a aplicar 240 L/ha com a mesma velocidade e os mesmos bicos.</p>
+<div class="formula"><div class="eq sm"><span><i>P</i><sub>pretendida</sub> =</span><span class="pr">(</span><span class="fr"><span>240</span><span>200</span></span><span class="pr">)</span><sup>2</sup><span>× 3</span></div><div class="eq-r">= 4,32 bar</div></div>
+</div>
+<div>
+<h4>Para ter em conta</h4>
+<ul><li>Confirme no catálogo do fabricante que a pressão calculada fica dentro da gama de trabalho do bico.</li><li>Regra prática: um aumento de 10 % no volume exige cerca de 21 % mais pressão. Para mudanças grandes, é melhor mudar de bicos ou de velocidade.</li><li>Regule a pressão com o manómetro e a válvula reguladora de pressão, e volte a medir o débito depois do ajuste.</li></ul>
+</div>
+</div>
+
+<div class="calc">
+<h4>Calculadora de pressão de trabalho</h4>
+<div class="fields">
+<div><label for="p-DPa">Débito do pulverizador atual, <i>Dp</i><sub>atual</sub> (L/ha)</label><input id="p-DPa" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="p-DPp">Débito do pulverizador pretendido, <i>Dp</i><sub>pretendido</sub> (L/ha)</label><input id="p-DPp" type="text" inputmode="decimal" placeholder="ex.: 240"></div><div><label for="p-Pa">Pressão atual, <i>P</i><sub>atual</sub></label><div class="row2"><input id="p-Pa" type="text" inputmode="decimal" placeholder="ex.: 3" aria-label="Pressão atual"><select id="p-unit" aria-label="Unidade de pressão"><option value="bar">bar</option><option value="kPa">kPa</option><option value="psi">psi</option></select></div></div>
+</div>
+
+<div class="actions">
+<button class="btn" id="p-go" type="button">Calcular</button>
+<button class="btn sec" id="p-clear" type="button">Limpar</button>
+</div>
+<div class="result" id="p-res" aria-live="polite">Pressão pretendida: --</div>
+</div>
+</section>
+</main>
+
+<div class="attribution">
+<p style="margin-top:.4rem;opacity:.8">Projeto independente, sem afiliação com a DGAV nem a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> · © 2026</p>
+</div>
+
+<div class="pop" id="pop600" role="dialog" aria-labelledby="pop600-t" hidden>
+<button class="pop-x" type="button" aria-label="Fechar">×</button>
+<h5 id="pop600-t">De onde vem o 600?</h5>
+<p>É um fator que converte as unidades da fórmula: o débito está em L/min, a velocidade em km/h e a largura em m, mas o resultado pretende-se em L/ha.</p>
+<p><b>1.</b> A 1 km/h o pulverizador avança 1000 m ÷ 60 min, cerca de 16,67 m por minuto. A área tratada por minuto é, por isso, <i>V</i> × <i>L</i> × 1000 ÷ 60 (m²/min).</p>
+<p><b>2.</b> 1 ha são 10 000 m². Os litros por hectare obtêm-se dividindo o débito total (<i>Db</i> × <i>n</i>, em L/min) pela área tratada por minuto e multiplicando por 10 000.</p>
+<p><b>3.</b> Como 10 000 × 60 ÷ 1000 = <b>600</b>, fica <i>Dp</i> = 600 × <i>Db</i> × <i>n</i> ÷ (<i>V</i> × <i>L</i>).</p>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const num=el=>parseFloat(String(el.value).trim().replace(/\s/g,'').replace(',','.'));
+  const nf=(v,d)=>v.toLocaleString('pt-PT',{minimumFractionDigits:0,maximumFractionDigits:d});
+  const ok=x=>isFinite(x)&&x>0;
+  const err=m=>'<span class="err">'+m+'</span>';
+  const I=t=>'<i>'+t+'</i>';
+  const pct=r=>{const v=(r-1)*100;return (v>=0?'+':'')+nf(v,1)+' %';};
+
+  /* Separadores */
+  const names=['deb','bicos','vel','pressao'];
+  function show(k){
+    if(typeof closePop==='function')closePop();
+    names.forEach(n=>{const on=n===k;$('tab-'+n).setAttribute('aria-selected',on);$('p-'+n).hidden=!on;});
+    history.replaceState(null,'','#'+k);
+  }
+  names.forEach(n=>$('tab-'+n).onclick=()=>show(n));
+  /* Balão de explicação do 600 */
+  const pop=$('pop600');let popBtn=null;
+  function closePop(){if(!pop.hidden){pop.hidden=true;pop.classList.remove('up');}if(popBtn){popBtn.setAttribute('aria-expanded','false');popBtn=null;}}
+  function openPop(b){
+    closePop();popBtn=b;b.setAttribute('aria-expanded','true');
+    pop.hidden=false;pop.style.left='0px';pop.style.top='0px';
+    const r=b.getBoundingClientRect(),pw=pop.offsetWidth,ph=pop.offsetHeight,sx=window.scrollX,sy=window.scrollY,vw=document.documentElement.clientWidth;
+    let left=r.left+sx+r.width/2-pw/2;
+    left=Math.max(sx+8,Math.min(left,sx+vw-pw-8));
+    const below=r.bottom+ph+16<window.innerHeight||r.top<ph+16;
+    pop.classList.toggle('up',!below);
+    pop.style.left=left+'px';
+    pop.style.top=(below?r.bottom+sy+10:r.top+sy-ph-10)+'px';
+    pop.style.setProperty('--ax',(r.left+sx+r.width/2-left)+'px');
+  }
+  document.querySelectorAll('.info').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();(popBtn===b)?closePop():openPop(b);}));
+  pop.querySelector('.pop-x').onclick=()=>closePop();
+  document.addEventListener('click',e=>{if(!pop.hidden&&!pop.contains(e.target))closePop();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop();});
+  window.addEventListener('resize',closePop);
+
+  const h0=location.hash.replace('#','');
+  if(names.includes(h0)) show(h0);
+
+  /* 1. Débito do pulverizador: Dp = 600 x D x n / (V x L) */
+  const cfg={
+    barra:{W:'Largura de trabalho, <i>L</i> (m)',ph:'ex.: 15',Dph:'ex.: 0,5',nph:'ex.: 28'},
+    d3:{W:'Distância entrelinha, <i>L</i> (m)',ph:'ex.: 4',Dph:'ex.: 2',nph:'ex.: 16'}
+  };
+  function refresh(){
+    const t=cfg[$('f-tipo').value],c=$('f-calc').value;
+    $('l-W').innerHTML=t.W;$('f-W').placeholder=t.ph;$('f-D').placeholder=t.Dph;$('f-n').placeholder=t.nph;
+    $('w-D').hidden=c==='d';$('w-v').hidden=c==='v';$('w-DP').hidden=c==='dp';
+    $('f-res').textContent='Resultado: --';
+  }
+  $('f-tipo').onchange=refresh;$('f-calc').onchange=refresh;refresh();
+  $('f-go').onclick=()=>{
+    const c=$('f-calc').value;
+    const D=num($('f-D')),n=num($('f-n')),V=num($('f-v')),L=num($('f-W')),Dp=num($('f-DP')),cap=num($('f-cap'));
+    const need={dp:[D,n,V,L],d:[n,V,L,Dp],v:[D,n,L,Dp]}[c];
+    if(!need.every(ok)){$('f-res').innerHTML=err('Introduza valores positivos em todos os campos visíveis.');return;}
+    let out,fx,Dn=D,Dpn=Dp;
+    if(c==='dp'){Dpn=600*D*n/(V*L);out='Débito do pulverizador: <strong>'+nf(Dpn,2)+' L/ha</strong>';fx=I('Dp')+' = 600 × '+I('Db')+' × '+I('n')+' ÷ ('+I('V')+' × '+I('L')+') = 600 × '+nf(D,3)+' × '+nf(n,0)+' ÷ ('+nf(V,3)+' × '+nf(L,3)+')';}
+    if(c==='d'){Dn=Dp*V*L/(600*n);out='Débito de cada bico: <strong>'+nf(Dn,3)+' L/min</strong>';fx=I('Db')+' = '+I('Dp')+' × '+I('V')+' × '+I('L')+' ÷ (600 × '+I('n')+') = '+nf(Dp,3)+' × '+nf(V,3)+' × '+nf(L,3)+' ÷ (600 × '+nf(n,0)+')';}
+    if(c==='v'){const Vn=600*D*n/(Dp*L);out='Velocidade de avanço: <strong>'+nf(Vn,2)+' km/h</strong>';fx=I('V')+' = 600 × '+I('Db')+' × '+I('n')+' ÷ ('+I('Dp')+' × '+I('L')+') = 600 × '+nf(D,3)+' × '+nf(n,0)+' ÷ ('+nf(Dp,3)+' × '+nf(L,3)+')';}
+    let extra='<span class="extra">'+fx+'</span>';
+    const tot=Dn*n;
+    extra+='<span class="extra">Débito total dos bicos: '+nf(tot,2)+' L/min</span>';
+    if(ok(cap)&&ok(Dpn)){
+      const ha=cap/Dpn;
+      extra+='<span class="extra">Área tratada por depósito: '+nf(ha,3)+' ha ('+nf(ha*10000,0)+' m²)</span>';
+      if(ok(tot)) extra+='<span class="extra">Autonomia do depósito: '+nf(cap/tot,1)+' min</span>';
+    }
+    $('f-res').innerHTML=out+extra;
+  };
+  $('f-clear').onclick=()=>{['f-D','f-n','f-v','f-W','f-DP','f-cap'].forEach(i=>$(i).value='');$('f-res').textContent='Resultado: --';};
+
+  /* 2. Débito dos bicos: D = V x L x Dp / (600 x n) */
+  $('n-go').onclick=()=>{
+    const V=num($('n-v')),L=num($('n-L')),Dp=num($('n-DP')),n=num($('n-N'));
+    if(!ok(V)||!ok(L)||!ok(Dp)||!ok(n)){$('n-res').innerHTML=err('Introduza valores positivos em todos os campos.');return;}
+    const tot=V*L*Dp/600,D=tot/n;
+    $('n-res').innerHTML='Débito necessário por bico: <strong>'+nf(D,3)+' L/min</strong>'
+      +'<span class="extra">'+nf(D*1000,0)+' mL/min por bico</span>'
+      +'<span class="extra">'+I('Db')+' = ('+I('V')+' × '+I('L')+' × '+I('Dp')+') ÷ (600 × '+I('n')+') = ('+nf(V,3)+' × '+nf(L,3)+' × '+nf(Dp,3)+') ÷ (600 × '+nf(n,0)+')</span>'
+      +'<span class="extra">Débito total dos bicos: '+nf(tot,2)+' L/min</span>';
+  };
+  $('n-clear').onclick=()=>{['n-v','n-L','n-DP','n-N'].forEach(i=>$(i).value='');$('n-res').textContent='Débito por bico: --';};
+
+  /* 3. Velocidade: V pretendida = (Dp atual / Dp pretendido) x V atual */
+  $('s-go').onclick=()=>{
+    const a=num($('s-DPa')),p=num($('s-DPp')),v=num($('s-va'));
+    if(!ok(a)||!ok(p)||!ok(v)){$('s-res').innerHTML=err('Introduza valores positivos em todos os campos.');return;}
+    const vp=a/p*v;
+    $('s-res').innerHTML='Nova velocidade: <strong>'+nf(vp,2)+' km/h</strong>'
+      +'<span class="extra">'+I('V')+'<sub>pretendida</sub> = ('+I('Dp')+'<sub>atual</sub> ÷ '+I('Dp')+'<sub>pretendido</sub>) × '+I('V')+'<sub>atual</sub> = ('+nf(a,3)+' ÷ '+nf(p,3)+') × '+nf(v,3)+'</span>'
+      +'<span class="extra">Variação face à velocidade atual: '+pct(vp/v)+'</span>';
+  };
+  $('s-clear').onclick=()=>{['s-DPa','s-DPp','s-va','s-dist','s-tempo'].forEach(i=>$(i).value='');$('s-res').textContent='Nova velocidade: --';$('s-hres').textContent='Resultado: --';};
+  $('s-hcalc').onclick=()=>{
+    const d=num($('s-dist')),t=num($('s-tempo'));
+    if(!ok(d)||!ok(t)){$('s-hres').innerHTML=err('Introduza a distância e o tempo.');return;}
+    const v=d/t*3.6;
+    $('s-hres').innerHTML='Velocidade: <strong>'+nf(v,2)+' km/h</strong>';
+    $('s-va').value=nf(v,2);
+  };
+
+  /* 4. Pressão: P pretendida = (Dp pretendido / Dp atual)^2 x P atual */
+  $('p-go').onclick=()=>{
+    const a=num($('p-DPa')),p=num($('p-DPp')),P=num($('p-Pa')),u=$('p-unit').value;
+    if(!ok(a)||!ok(p)||!ok(P)){$('p-res').innerHTML=err('Introduza valores positivos em todos os campos.');return;}
+    const r=p/a,Pp=r*r*P;
+    $('p-res').innerHTML='Pressão pretendida: <strong>'+nf(Pp,2)+' '+u+'</strong>'
+      +'<span class="extra">'+I('P')+'<sub>pretendida</sub> = ('+I('Dp')+'<sub>pretendido</sub> ÷ '+I('Dp')+'<sub>atual</sub>)² × '+I('P')+'<sub>atual</sub> = ('+nf(p,3)+' ÷ '+nf(a,3)+')² × '+nf(P,3)+'</span>'
+      +'<span class="extra">Variação da pressão: '+pct(r*r)+' · Variação do volume de calda: '+pct(r)+'</span>';
+  };
+  $('p-clear').onclick=()=>{['p-DPa','p-DPp','p-Pa'].forEach(i=>$(i).value='');$('p-res').textContent='Pressão pretendida: --';};
+
+  /* Enter calcula */
+  document.querySelectorAll('.calc').forEach(c=>c.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return;
+    const d=i.closest('details'),b=d?d.querySelector('.btn'):c.querySelector(':scope > .actions .btn');
+    if(b)b.click();
+  })));
+})();
+</script>
+</body>
+</html>

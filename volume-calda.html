@@ -146,7 +146,6 @@ summary{padding:.55rem 0;font-size:.85rem}
 <h1><span>Agro</span>Fito</h1>
 <p>Volume de Calda</p>
 </div></a>
-<a class="back" href="index.html">Início</a>
 </header>
 
 <div class="hero">
@@ -388,6 +387,7 @@ summary{padding:.55rem 0;font-size:.85rem}
 <p><b>3.</b> Como 10 000 × 60 ÷ 1000 = <b>600</b>, fica <i>Dp</i> = 600 × <i>Db</i> × <i>n</i> ÷ (<i>V</i> × <i>L</i>).</p>
 </div>
 
+<script src="relatorio.js"></script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
@@ -400,7 +400,10 @@ summary{padding:.55rem 0;font-size:.85rem}
 
   /* Separadores */
   const names=['deb','bicos','vel','pressao'];
+  const LAST={};
+  let cur='deb';
   function show(k){
+    cur=k;
     if(typeof closePop==='function')closePop();
     names.forEach(n=>{const on=n===k;$('tab-'+n).setAttribute('aria-selected',on);$('p-'+n).hidden=!on;});
     history.replaceState(null,'','#'+k);
@@ -439,7 +442,7 @@ summary{padding:.55rem 0;font-size:.85rem}
     const t=cfg[$('f-tipo').value],c=$('f-calc').value;
     $('l-W').innerHTML=t.W;$('f-W').placeholder=t.ph;$('f-D').placeholder=t.Dph;$('f-n').placeholder=t.nph;
     $('w-D').hidden=c==='d';$('w-v').hidden=c==='v';$('w-DP').hidden=c==='dp';
-    $('f-res').textContent='Resultado: --';
+    $('f-res').textContent='Resultado: --';delete LAST.deb;
   }
   $('f-tipo').onchange=refresh;$('f-calc').onchange=refresh;refresh();
   $('f-go').onclick=()=>{
@@ -447,10 +450,10 @@ summary{padding:.55rem 0;font-size:.85rem}
     const D=num($('f-D')),n=num($('f-n')),V=num($('f-v')),L=num($('f-W')),Dp=num($('f-DP')),cap=num($('f-cap'));
     const need={dp:[D,n,V,L],d:[n,V,L,Dp],v:[D,n,L,Dp]}[c];
     if(!need.every(ok)){$('f-res').innerHTML=err('Introduza valores positivos em todos os campos visíveis.');return;}
-    let out,fx,Dn=D,Dpn=Dp;
+    let out,fx,Dn=D,Dpn=Dp,Vn=V;
     if(c==='dp'){Dpn=600*D*n/(V*L);out='Débito do pulverizador: <strong>'+nf(Dpn,2)+' L/ha</strong>';fx=I('Dp')+' = 600 × '+I('Db')+' × '+I('n')+' ÷ ('+I('V')+' × '+I('L')+') = 600 × '+nf(D,3)+' × '+nf(n,0)+' ÷ ('+nf(V,3)+' × '+nf(L,3)+')';}
     if(c==='d'){Dn=Dp*V*L/(600*n);out='Débito de cada bico: <strong>'+nf(Dn,3)+' L/min</strong>';fx=I('Db')+' = '+I('Dp')+' × '+I('V')+' × '+I('L')+' ÷ (600 × '+I('n')+') = '+nf(Dp,3)+' × '+nf(V,3)+' × '+nf(L,3)+' ÷ (600 × '+nf(n,0)+')';}
-    if(c==='v'){const Vn=600*D*n/(Dp*L);out='Velocidade de avanço: <strong>'+nf(Vn,2)+' km/h</strong>';fx=I('V')+' = 600 × '+I('Db')+' × '+I('n')+' ÷ ('+I('Dp')+' × '+I('L')+') = 600 × '+nf(D,3)+' × '+nf(n,0)+' ÷ ('+nf(Dp,3)+' × '+nf(L,3)+')';}
+    if(c==='v'){Vn=600*D*n/(Dp*L);out='Velocidade de avanço: <strong>'+nf(Vn,2)+' km/h</strong>';fx=I('V')+' = 600 × '+I('Db')+' × '+I('n')+' ÷ ('+I('Dp')+' × '+I('L')+') = 600 × '+nf(D,3)+' × '+nf(n,0)+' ÷ ('+nf(Dp,3)+' × '+nf(L,3)+')';}
     let extra='<span class="extra">'+fx+'</span>';
     const tot=Dn*n;
     extra+='<span class="extra">Débito total dos bicos: '+nf(tot,2)+' L/min</span>';
@@ -459,32 +462,35 @@ summary{padding:.55rem 0;font-size:.85rem}
       extra+='<span class="extra">Área tratada por depósito: '+nf(ha,3)+' ha ('+nf(ha*10000,0)+' m²)</span>';
       if(ok(tot)) extra+='<span class="extra">Autonomia do depósito: '+nf(cap/tot,1)+' min</span>';
     }
+    LAST.deb={c,tipo:$('f-tipo').value,D:Dn,n,V:Vn,L,Dp:Dpn,cap};
     $('f-res').innerHTML=out+extra;
   };
-  $('f-clear').onclick=()=>{['f-D','f-n','f-v','f-W','f-DP','f-cap'].forEach(i=>$(i).value='');$('f-res').textContent='Resultado: --';};
+  $('f-clear').onclick=()=>{delete LAST.deb;['f-D','f-n','f-v','f-W','f-DP','f-cap'].forEach(i=>$(i).value='');$('f-res').textContent='Resultado: --';};
 
   /* 2. Débito dos bicos: D = V x L x Dp / (600 x n) */
   $('n-go').onclick=()=>{
     const V=num($('n-v')),L=num($('n-L')),Dp=num($('n-DP')),n=num($('n-N'));
     if(!ok(V)||!ok(L)||!ok(Dp)||!ok(n)){$('n-res').innerHTML=err('Introduza valores positivos em todos os campos.');return;}
     const tot=V*L*Dp/600,D=tot/n;
+    LAST.bicos={V,L,Dp,n,D,tot};
     $('n-res').innerHTML='Débito necessário por bico: <strong>'+nf(D,3)+' L/min</strong>'
       +'<span class="extra">'+nf(D*1000,0)+' mL/min por bico</span>'
       +'<span class="extra">'+I('Db')+' = ('+I('V')+' × '+I('L')+' × '+I('Dp')+') ÷ (600 × '+I('n')+') = ('+nf(V,3)+' × '+nf(L,3)+' × '+nf(Dp,3)+') ÷ (600 × '+nf(n,0)+')</span>'
       +'<span class="extra">Débito total dos bicos: '+nf(tot,2)+' L/min</span>';
   };
-  $('n-clear').onclick=()=>{['n-v','n-L','n-DP','n-N'].forEach(i=>$(i).value='');$('n-res').textContent='Débito por bico: --';};
+  $('n-clear').onclick=()=>{delete LAST.bicos;['n-v','n-L','n-DP','n-N'].forEach(i=>$(i).value='');$('n-res').textContent='Débito por bico: --';};
 
   /* 3. Velocidade: V pretendida = (Dp atual / Dp pretendido) x V atual */
   $('s-go').onclick=()=>{
     const a=num($('s-DPa')),p=num($('s-DPp')),v=num($('s-va'));
     if(!ok(a)||!ok(p)||!ok(v)){$('s-res').innerHTML=err('Introduza valores positivos em todos os campos.');return;}
     const vp=a/p*v;
+    LAST.vel={a,p,v,vp};
     $('s-res').innerHTML='Nova velocidade: <strong>'+nf(vp,2)+' km/h</strong>'
       +'<span class="extra">'+I('V')+'<sub>pretendida</sub> = ('+I('Dp')+'<sub>atual</sub> ÷ '+I('Dp')+'<sub>pretendido</sub>) × '+I('V')+'<sub>atual</sub> = ('+nf(a,3)+' ÷ '+nf(p,3)+') × '+nf(v,3)+'</span>'
       +'<span class="extra">Variação face à velocidade atual: '+pct(vp/v)+'</span>';
   };
-  $('s-clear').onclick=()=>{['s-DPa','s-DPp','s-va','s-dist','s-tempo'].forEach(i=>$(i).value='');$('s-res').textContent='Nova velocidade: --';$('s-hres').textContent='Resultado: --';};
+  $('s-clear').onclick=()=>{delete LAST.vel;['s-DPa','s-DPp','s-va','s-dist','s-tempo'].forEach(i=>$(i).value='');$('s-res').textContent='Nova velocidade: --';$('s-hres').textContent='Resultado: --';};
   $('s-hcalc').onclick=()=>{
     const d=num($('s-dist')),t=num($('s-tempo'));
     if(!ok(d)||!ok(t)){$('s-hres').innerHTML=err('Introduza a distância e o tempo.');return;}
@@ -498,11 +504,12 @@ summary{padding:.55rem 0;font-size:.85rem}
     const a=num($('p-DPa')),p=num($('p-DPp')),P=num($('p-Pa')),u=$('p-unit').value;
     if(!ok(a)||!ok(p)||!ok(P)){$('p-res').innerHTML=err('Introduza valores positivos em todos os campos.');return;}
     const r=p/a,Pp=r*r*P;
+    LAST.pressao={a,p,P,u,Pp,r};
     $('p-res').innerHTML='Pressão pretendida: <strong>'+nf(Pp,2)+' '+u+'</strong>'
       +'<span class="extra">'+I('P')+'<sub>pretendida</sub> = ('+I('Dp')+'<sub>pretendido</sub> ÷ '+I('Dp')+'<sub>atual</sub>)² × '+I('P')+'<sub>atual</sub> = ('+nf(p,3)+' ÷ '+nf(a,3)+')² × '+nf(P,3)+'</span>'
       +'<span class="extra">Variação da pressão: '+pct(r*r)+' · Variação do volume de calda: '+pct(r)+'</span>';
   };
-  $('p-clear').onclick=()=>{['p-DPa','p-DPp','p-Pa'].forEach(i=>$(i).value='');$('p-res').textContent='Pressão pretendida: --';};
+  $('p-clear').onclick=()=>{delete LAST.pressao;['p-DPa','p-DPp','p-Pa'].forEach(i=>$(i).value='');$('p-res').textContent='Pressão pretendida: --';};
 
   /* Enter calcula */
   document.querySelectorAll('.calc').forEach(c=>c.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{
@@ -510,6 +517,54 @@ summary{padding:.55rem 0;font-size:.85rem}
     const d=i.closest('details'),b=d?d.querySelector('.btn'):c.querySelector(':scope > .actions .btn');
     if(b)b.click();
   })));
+  /* Relatório PDF e partilha */
+  const PD=AgroPDF,fr=PD.fr,F=v=>PD.fmt(v,3);
+  const SL={deb:'Débito do pulverizador',bicos:'Débito dos bicos',vel:'Velocidade de pulverização',pressao:'Pressão de trabalho'};
+  AgroTools.mount({
+    link:()=>location.href.split('#')[0]+'#'+cur,
+    getReport(){
+      const r=LAST[cur];
+      if(!r) return {error:'Faça primeiro um cálculo neste separador.'};
+      const base={title:SL[cur],slug:SL[cur]};
+      if(cur==='deb'){
+        const L_=r.tipo==='barra'?'Largura de trabalho':'Distância entrelinha';
+        const rows=[['Tipo de cultura','',r.tipo==='barra'?'Culturas baixas (pulverizador de barra)':'Pomares e vinhas (culturas 3D)','']];
+        if(r.c!=='d')rows.push(['Débito de cada bico','<i>Db</i>',F(r.D),'L/min']);
+        rows.push(['Número de bicos','<i>n</i>',F(r.n),'']);
+        if(r.c!=='v')rows.push(['Velocidade de avanço','<i>V</i>',F(r.V),'km/h']);
+        rows.push([L_,'<i>L</i>',F(r.L),'m']);
+        if(r.c!=='dp')rows.push(['Débito do pulverizador pretendido','<i>Dp</i>',F(r.Dp),'L/ha']);
+        if(isFinite(r.cap)&&r.cap>0)rows.push(['Capacidade do depósito','',F(r.cap),'L']);
+        let lines,res;
+        if(r.c==='dp'){base.subtitle='Volume de calda por hectare (L/ha)';
+          lines=[['<i>Dp</i> = ',fr('600 × <i>Db</i> × <i>n</i>','<i>V</i> × <i>L</i>')],['<i>Dp</i> = ',fr('600 × '+F(r.D)+' × '+F(r.n),F(r.V)+' × '+F(r.L)),' = <b>'+nf(r.Dp,2)+' L/ha</b>']];
+          res={label:'Débito do pulverizador',sym:'<i>Dp</i> =',value:nf(r.Dp,2),unit:'L/ha'};}
+        else if(r.c==='d'){base.subtitle='Débito necessário em cada bico (L/min)';
+          lines=[['<i>Db</i> = ',fr('<i>Dp</i> × <i>V</i> × <i>L</i>','600 × <i>n</i>')],['<i>Db</i> = ',fr(F(r.Dp)+' × '+F(r.V)+' × '+F(r.L),'600 × '+F(r.n)),' = <b>'+nf(r.D,3)+' L/min</b>']];
+          res={label:'Débito de cada bico',sym:'<i>Db</i> =',value:nf(r.D,3),unit:'L/min'};}
+        else{base.subtitle='Velocidade de avanço necessária (km/h)';
+          lines=[['<i>V</i> = ',fr('600 × <i>Db</i> × <i>n</i>','<i>Dp</i> × <i>L</i>')],['<i>V</i> = ',fr('600 × '+F(r.D)+' × '+F(r.n),F(r.Dp)+' × '+F(r.L)),' = <b>'+nf(r.V,2)+' km/h</b>']];
+          res={label:'Velocidade de avanço',sym:'<i>V</i> =',value:nf(r.V,2),unit:'km/h'};}
+        const tot=r.D*r.n;res.extras=[['Débito total dos bicos',nf(tot,2)+' L/min']];
+        if(isFinite(r.cap)&&r.cap>0){const ha=r.cap/r.Dp;res.extras.push(['Área tratada por depósito',nf(ha,3)+' ha ('+nf(ha*10000,0)+' m²)'],['Autonomia do depósito',nf(r.cap/tot,1)+' min']);}
+        base.blocks=[{t:'inputs',rows},{t:'formula',lines},Object.assign({t:'result'},res),{t:'lines',n:3}];return base;}
+      if(cur==='bicos'){base.subtitle='Débito necessário por bico (L/min)';
+        base.blocks=[{t:'inputs',rows:[['Velocidade de avanço','<i>V</i>',F(r.V),'km/h'],['Largura de trabalho','<i>L</i>',F(r.L),'m'],['Débito do pulverizador pretendido','<i>Dp</i>',F(r.Dp),'L/ha'],['Número de bicos','<i>n</i>',F(r.n),'']]},
+          {t:'formula',lines:[['<i>Db</i> = ',fr('<i>V</i> × <i>L</i> × <i>Dp</i>','600 × <i>n</i>')],['<i>Db</i> = ',fr(F(r.V)+' × '+F(r.L)+' × '+F(r.Dp),'600 × '+F(r.n)),' = <b>'+nf(r.D,3)+' L/min</b>']]},
+          {t:'result',label:'Débito necessário por bico',sym:'<i>Db</i> =',value:nf(r.D,3),unit:'L/min',extras:[['Em mL por minuto',nf(r.D*1000,0)+' mL/min'],['Débito total dos bicos',nf(r.tot,2)+' L/min']]},
+          {t:'lines',n:3}];return base;}
+      if(cur==='vel'){base.subtitle='Nova velocidade de avanço (km/h)';
+        base.blocks=[{t:'inputs',rows:[['Débito do pulverizador atual','<i>Dp</i><sub>atual</sub>',F(r.a),'L/ha'],['Débito do pulverizador pretendido','<i>Dp</i><sub>pretendido</sub>',F(r.p),'L/ha'],['Velocidade de avanço atual','<i>V</i><sub>atual</sub>',F(r.v),'km/h']]},
+          {t:'formula',lines:[['<i>V</i><sub>pretendida</sub> = ',fr('<i>Dp</i><sub>atual</sub>','<i>Dp</i><sub>pretendido</sub>'),' × <i>V</i><sub>atual</sub>'],['<i>V</i><sub>pretendida</sub> = ',fr(F(r.a),F(r.p)),' × '+F(r.v)+' = <b>'+nf(r.vp,2)+' km/h</b>']]},
+          {t:'result',label:'Nova velocidade de avanço',sym:'<i>V</i><sub>pretendida</sub> =',value:nf(r.vp,2),unit:'km/h',extras:[['Variação da velocidade',pct(r.vp/r.v)]]},
+          {t:'lines',n:3}];return base;}
+      base.subtitle='Pressão de pulverização pretendida';
+      base.blocks=[{t:'inputs',rows:[['Débito do pulverizador atual','<i>Dp</i><sub>atual</sub>',F(r.a),'L/ha'],['Débito do pulverizador pretendido','<i>Dp</i><sub>pretendido</sub>',F(r.p),'L/ha'],['Pressão de trabalho atual','<i>P</i><sub>atual</sub>',F(r.P),r.u]]},
+        {t:'formula',lines:[['<i>P</i><sub>pretendida</sub> = ',PD.paren('('),fr('<i>Dp</i><sub>pretendido</sub>','<i>Dp</i><sub>atual</sub>'),PD.paren(')'),'<sup>2</sup> × <i>P</i><sub>atual</sub>'],['<i>P</i><sub>pretendida</sub> = ',PD.paren('('),fr(F(r.p),F(r.a)),PD.paren(')'),'<sup>2</sup> × '+F(r.P)+' = <b>'+nf(r.Pp,2)+' '+r.u+'</b>']]},
+        {t:'result',label:'Pressão de trabalho pretendida',sym:'<i>P</i><sub>pretendida</sub> =',value:nf(r.Pp,2),unit:r.u,extras:[['Variação da pressão',pct(r.r*r.r)],['Variação do débito do pulverizador',pct(r.r)]]},
+        {t:'lines',n:3}];return base;
+    }
+  });
 })();
 </script>
 </body>

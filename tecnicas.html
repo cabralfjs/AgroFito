@@ -122,7 +122,6 @@ summary{padding:.55rem 0;font-size:.85rem}
 <h1><span>Agro</span>Fito</h1>
 <p>Técnicas de Aplicação</p>
 </div></a>
-<a class="back" href="index.html">Início</a>
 </header>
 
 <div class="hero">
@@ -290,16 +289,20 @@ summary{padding:.55rem 0;font-size:.85rem}
 <p style="margin-top:.4rem;opacity:.8">Projeto independente, sem afiliação com a DGAV nem a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> · © 2026</p>
 </div>
 
+<script src="relatorio.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
   const nf = (v, d) => v.toLocaleString('pt-PT', {minimumFractionDigits:d, maximumFractionDigits:d});
   const num = el => parseFloat(String(el.value).trim().replace(/\s/g,'').replace(',', '.'));
   const bad = (...v) => v.some(x => !isFinite(x) || x <= 0);
+  const LAST = {};
+  let cur = 'lwa';
 
   /* Separadores */
   const tabs = {lwa:[$('tab-lwa'),$('p-lwa')], trv:[$('tab-trv'),$('p-trv')]};
   function show(k){
+    cur = k;
     for(const key in tabs){
       const on = key===k;
       tabs[key][0].setAttribute('aria-selected', on);
@@ -317,9 +320,10 @@ summary{padding:.55rem 0;font-size:.85rem}
     const h = num($('lwa-h')), d = num($('lwa-d')), out = $('lwa-res');
     if(bad(h,d)){ out.innerHTML = '<span class="err">Introduza valores positivos para a altura da copa e a distância entrelinha.</span>'; return; }
     const lwa = 2*h*10000/d;
+    LAST.lwa = {h,d,lwa};
     out.innerHTML = 'LWA: <strong>' + nf(lwa,1) + ' m²/ha</strong>';
   };
-  $('lwa-clear').onclick = () => { $('lwa-h').value=''; $('lwa-d').value=''; $('lwa-res').textContent='Resultado: --'; };
+  $('lwa-clear').onclick = () => { delete LAST.lwa; $('lwa-h').value=''; $('lwa-d').value=''; $('lwa-res').textContent='Resultado: --'; };
 
   /* TRV = (h * L * 10000 / d) * k */
   const kSel = $('trv-kp'), kIn = $('trv-k');
@@ -334,10 +338,12 @@ summary{padding:.55rem 0;font-size:.85rem}
     if(bad(h,L,d,k)){ out.innerHTML = '<span class="err">Introduza valores positivos em todos os campos.</span>'; return; }
     const vol = h*L*10000/d;
     const trv = vol*k;
+    LAST.trv = {h,L,d,k,vol,trv};
     out.innerHTML = 'TRV: <strong>' + nf(trv,0) + ' L/ha</strong>' +
       '<span class="extra">Volume de copa: ' + nf(vol,0) + ' m³/ha · <i>k</i> = ' + nf(k,3) + ' L/m³</span>';
   };
   $('trv-clear').onclick = () => {
+    delete LAST.trv;
     ['trv-h','trv-l','trv-d'].forEach(i => $(i).value='');
     kSel.value='0.033'; kIn.value='0,033';
     $('trv-res').textContent='Resultado: --';
@@ -346,6 +352,31 @@ summary{padding:.55rem 0;font-size:.85rem}
   /* Enter calcula */
   ['lwa-h','lwa-d'].forEach(i => $(i).addEventListener('keydown', e => { if(e.key==='Enter') $('lwa-calc').click(); }));
   ['trv-h','trv-l','trv-d','trv-k'].forEach(i => $(i).addEventListener('keydown', e => { if(e.key==='Enter') $('trv-calc').click(); }));
+  /* Relatório PDF e partilha */
+  const P = AgroPDF, fr = P.fr, F = v => P.fmt(v,3);
+  AgroTools.mount({
+    link: () => location.href.split('#')[0] + '#' + cur,
+    getReport(){
+      const r = LAST[cur];
+      if(!r) return {error:'Faça primeiro um cálculo neste separador.'};
+      if(cur === 'lwa') return {
+        title:'Leaf Wall Area (LWA)', slug:'LWA', subtitle:'Área de parede foliar tratada (m²/ha)',
+        blocks:[
+          {t:'inputs', rows:[['Altura da copa','<i>h</i>',F(r.h),'m'],['Distância entrelinha','<i>d</i>',F(r.d),'m']]},
+          {t:'formula', lines:[['LWA = ',fr('2 × <i>h</i> × 10 000','<i>d</i>')],['LWA = ',fr('2 × '+F(r.h)+' × 10 000',F(r.d)),' = <b>'+P.nf(r.lwa,1)+' m²/ha</b>']]},
+          {t:'result', label:'Área de parede foliar tratada', sym:'LWA =', value:P.nf(r.lwa,1), unit:'m²/ha',
+           extras:[['Comprimento de linha por hectare',P.nf(10000/r.d,1)+' m']]},
+          {t:'lines', n:3}]};
+      return {
+        title:'Tree-Row Volume (TRV)', slug:'TRV', subtitle:'Volume de calda adequado ao volume de copa (L/ha)',
+        blocks:[
+          {t:'inputs', rows:[['Altura da copa','<i>h</i>',F(r.h),'m'],['Largura da copa','<i>L</i>',F(r.L),'m'],['Distância entrelinha','<i>d</i>',F(r.d),'m'],['Litros de calda por m³ de copa','<i>k</i>',F(r.k),'L/m³']]},
+          {t:'formula', lines:[['TRV = ',fr('<i>h</i> × <i>L</i>','<i>d</i>'),' × 10 000 × <i>k</i>'],['TRV = ',fr(F(r.h)+' × '+F(r.L),F(r.d)),' × 10 000 × '+F(r.k)+' = <b>'+P.nf(r.trv,0)+' L/ha</b>']]},
+          {t:'result', label:'Débito do pulverizador (TRV)', sym:'TRV =', value:P.nf(r.trv,0), unit:'L/ha',
+           extras:[['Volume de copa',P.nf(r.vol,0)+' m³/ha'],['Valor de k',F(r.k)+' L/m³']]},
+          {t:'lines', n:3}]};
+    }
+  });
 })();
 </script>
 </body>

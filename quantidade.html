@@ -129,7 +129,6 @@ summary{padding:.55rem 0;font-size:.85rem}
 <h1><span>Agro</span>Fito</h1>
 <p>Quantidade de Fitofarmacêutico</p>
 </div></a>
-<a class="back" href="index.html">Início</a>
 </header>
 
 <div class="hero">
@@ -248,6 +247,7 @@ summary{padding:.55rem 0;font-size:.85rem}
 <p style="margin-top:.4rem;opacity:.8">Projeto independente, sem afiliação com a DGAV nem a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> · © 2026</p>
 </div>
 
+<script src="relatorio.js"></script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
@@ -257,8 +257,9 @@ summary{padding:.55rem 0;font-size:.85rem}
   const err=m=>'<span class="err">'+m+'</span>';
 
   let mode='dose';
+  let LAST=null;
   function setMode(m){
-    mode=m;
+    mode=m;LAST=null;
     $('m-dose').setAttribute('aria-selected',m==='dose');
     $('m-conc').setAttribute('aria-selected',m==='conc');
     $('s-dose').hidden=m!=='dose';
@@ -286,16 +287,19 @@ summary{padding:.55rem 0;font-size:.85rem}
       const cap=num($('d-cap')),dose=num($('d-dose')),vol=num($('d-vol')),u=$('d-unit').value;
       if(!ok(cap,dose,vol)){ $('q-res').innerHTML=err('Introduza valores positivos na capacidade, na dose e no débito do pulverizador.'); return; }
       const d=u==='mL'?dose/1000:dose;      // L/ha ou kg/ha
+      LAST={mode:'dose',cap,dose,u,vol,d,base:cap*d/vol,solid:u==='kg'};
       show(cap*d/vol,u==='kg',cap,vol);
     }else{
       const cap=num($('c-cap')),conc=num($('c-conc')),vol=num($('c-vol')),u=$('c-unit').value;
       if(!ok(cap,conc)){ $('q-res').innerHTML=err('Introduza valores positivos na capacidade do depósito e na concentração.'); return; }
       const q=cap/100*conc;                 // na unidade do rótulo (mL, g, kg ou L)
       const base=(u==='mL'||u==='g')?q/1000:q; // L ou kg
+      LAST={mode:'conc',cap,conc,u,vol,q,base,solid:u==='g'||u==='kg'};
       show(base,u==='g'||u==='kg',cap,vol);
     }
   };
   $('q-clear').onclick=()=>{
+    LAST=null;
     ['d-cap','d-dose','d-vol','e-agua','c-cap','c-conc','c-vol'].forEach(i=>$(i).value='');
     $('e-area').value='100';
     $('e-res').textContent='Resultado: --';
@@ -313,6 +317,33 @@ summary{padding:.55rem 0;font-size:.85rem}
   };
 
   document.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('q-calc').click(); }));
+  /* Relatório PDF e partilha */
+  const P=AgroPDF,fr=P.fr,F=v=>P.fmt(v,3);
+  AgroTools.mount({
+    link:()=>location.href.split('#')[0],
+    getReport(){
+      const r=LAST;
+      if(!r) return {error:'Faça primeiro um cálculo.'};
+      const small=r.base*1000,unit=r.solid?'g':'mL',big=r.solid?P.nf(r.base,3)+' kg':P.nf(r.base,3)+' L';
+      const extras=[['Equivalente',big],['Calda no depósito',F(r.cap)+' L']];
+      if(isFinite(r.vol)&&r.vol>0){const ha=r.cap/r.vol;extras.push(['Área tratada por depósito',P.nf(ha,3)+' ha ('+P.nf(ha*10000,0)+' m²)']);}
+      const result={t:'result',label:'Quantidade de produto fitofarmacêutico por depósito',sym:'<i>Q</i> =',value:P.nf(small,1),unit,extras};
+      if(r.mode==='dose'){
+        const rows=[['Capacidade do depósito','<i>Capacidade</i>',F(r.cap),'L'],['Dose indicada no rótulo','<i>Dose</i>',F(r.dose),r.u+'/ha'],['Débito do pulverizador','<i>Dp</i>',F(r.vol),'L/ha']];
+        if(r.u==='mL')extras.splice(1,0,['Dose convertida',F(r.d)+' L/ha']);
+        return {title:'Quantidade de fitofarmacêutico',slug:'Quantidade-por-deposito',subtitle:'Pulverizador de dorso, a partir da dose indicada no rótulo',
+          blocks:[{t:'inputs',rows},
+            {t:'formula',lines:[['<i>Q</i> = ',fr('<i>Capacidade</i> × <i>Dose</i>','<i>Dp</i>'),' × 1000'],['<i>Q</i> = ',fr(F(r.cap)+' × '+F(r.d),F(r.vol)),' × 1000 = <b>'+P.nf(small,1)+' '+unit+'</b>']]},
+            result,{t:'lines',n:3}]};
+      }
+      const rows=[['Capacidade do depósito','<i>Capacidade</i>',F(r.cap),'L'],['Concentração indicada no rótulo','<i>Concentração</i>',F(r.conc),r.u+'/hL']];
+      if(isFinite(r.vol)&&r.vol>0)rows.push(['Débito do pulverizador','<i>Dp</i>',F(r.vol),'L/ha']);
+      return {title:'Quantidade de fitofarmacêutico',slug:'Quantidade-por-deposito',subtitle:'Pulverizador de dorso, a partir da concentração indicada no rótulo',
+        blocks:[{t:'inputs',rows},
+          {t:'formula',lines:[['<i>Q</i> = ',fr('<i>Capacidade</i> × <i>Concentração</i>','100')],['<i>Q</i> = ',fr(F(r.cap)+' × '+F(r.conc),'100'),' = <b>'+F(r.q)+' '+r.u+'</b>']]},
+          result,{t:'lines',n:3}]};
+    }
+  });
 })();
 </script>
 </body>

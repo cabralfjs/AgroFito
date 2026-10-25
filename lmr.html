@@ -137,6 +137,7 @@ table a{color:var(--g3)}
   <p style="margin-top:.4rem;opacity:.8;font-size:.68rem">Projeto independente AgroFito, por Francisco Cabral</p>
 </div>
 
+<script src="relatorio.js"></script>
 <script>
 let LMR_INDEX = {};
 let CURRENT_DATA = {};
@@ -242,6 +243,39 @@ function renderTable(){
       </tr>`).join('');
   }).join('');
 }
+
+/* Relatório PDF e partilha */
+AgroTools.mount({
+  needsId:false,
+  link:()=>location.href,
+  getReport(){
+    const cultura=document.getElementById('f-cultura').value;
+    if(!cultura||!Object.keys(CURRENT_DATA).length) return {error:'Escolha primeiro uma cultura.'};
+    const filtro=document.getElementById('f-substancia').value.trim();
+    const entradas=Object.entries(CURRENT_DATA)
+      .filter(([sub])=>!filtro||sub.toLowerCase().includes(filtro.toLowerCase()))
+      .sort((a,b)=>a[0].localeCompare(b[0],'pt'));
+    if(!entradas.length) return {error:'Não há substâncias para incluir no relatório.'};
+    const rows=[];
+    entradas.forEach(([sub,info])=>{
+      const vals=Array.isArray(info)?info:[info];
+      vals.forEach((v,i)=>{
+        const lmr=[{text:v.mrl+' mg/kg',b:true}];
+        if(v.is_default)lmr.push({text:'valor por defeito',size:7.5,color:'#8a5a12'});
+        if(vals.length>1&&v.produto_eu)lmr.push({text:v.produto_eu,size:7.5,color:'#6b6b5a'});
+        const ref=[{text:v.regulamento||'',url:v.url_regulamento||undefined}];
+        if(v.alteracao)ref.push({text:'alterado por '+v.alteracao,size:7.5,url:v.url_alteracao||undefined,color:'#6b6b5a'});
+        rows.push([i===0?{text:sub,b:true}:'',lmr,ref,v.url_consulta_ue?{text:'Ver na base da UE',url:v.url_consulta_ue,size:8}:'']);
+      });
+    });
+    const info=['Cultura: '+cultura,'Substâncias incluídas: '+entradas.length+(filtro?' (filtro: "'+filtro+'")':'')];
+    return {kind:'Relatório de consulta',title:'LMR: '+cultura,slug:'LMR-'+cultura,subtitle:'Limites Máximos de Resíduos (mg/kg)',
+      footer:'Relatório gerado pelo AgroFito (agrofito.org). Dados da EU Pesticides Database (Comissão Europeia).',
+      blocks:[{t:'text',paras:info.map(t=>({text:t,size:10,b:true,color:'#1a5c35'}))},
+        {t:'table',cols:[{h:'Substância ativa',w:.28},{h:'LMR',w:.17},{h:'Referência',w:.37},{h:'Base da UE',w:.18}],rows},
+        {t:'text',paras:[{text:'O LMR é o limite legal de resíduo no alimento colhido: não confirma nem infirma se um produto ou substância está autorizado para uso nesta cultura em Portugal. Para essa informação, consulte as Condições de Utilização.',size:8.5,color:'#7a5200'}]}]};
+  }
+});
 
 init();
 </script>

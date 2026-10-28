@@ -1,7 +1,7 @@
 {
-  "name": "AgroFito — Produtos Fitofarmacêuticos",
+  "name": "AgroFito — Consultas e Cálculos para Produtos Fitofarmacêuticos",
   "short_name": "AgroFito",
-  "description": "Consulta de produtos fitofarmacêuticos autorizados e cancelados em Portugal, com dados oficiais DGAV/SIFITO.",
+  "description": "Consulta de produtos fitofarmacêuticos e usos autorizados em Portugal (DGAV/SIFITO), LMR e calculadoras de pulverização: volume de calda, bicos, velocidade e pressão.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -10,7 +10,15 @@
   "theme_color": "#0f3d22",
   "lang": "pt-PT",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }

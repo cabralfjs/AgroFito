@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- SEO Base -->
-<title>AgroFito — Consulta de Produtos Fitofarmacêuticos e Usos SIFITO / DGAV</title>
+<title>AgroFito — Consultas e Cálculos para Produtos Fitofarmacêuticos | SIFITO / DGAV</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Ccircle cx='26' cy='26' r='26' fill='%230f3d22'/%3E%3Cpath d='M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z' fill='%237cb83a'/%3E%3C/svg%3E">
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0f3d22">
-<meta name="description" content="Base de dados e ferramenta de consulta de produtos fitofarmacêuticos autorizados e cancelados em Portugal. Pesquise culturas, substâncias ativas e finalidades SIFITO/DGAV.">
-<meta name="keywords" content="SIFITO, DGAV, fitofarmacêuticos, produtos fitofarmacêuticos, agrofito, substâncias ativas, proteção de plantas, agricultura Portugal">
+<meta name="description" content="Consulta de produtos fitofarmacêuticos e usos autorizados em Portugal (SIFITO/DGAV), LMR e calculadoras de pulverização: volume de calda, bicos, velocidade e pressão.">
+<meta name="keywords" content="SIFITO, DGAV, fitofarmacêuticos, produtos fitofarmacêuticos, agrofito, substâncias ativas, proteção de plantas, agricultura Portugal, LMR, volume de calda, calculadora de pulverização, débito dos bicos, LWA, TRV">
 <meta name="author" content="Francisco Cabral">
 <link rel="canonical" href="https://agrofito.org/">
 <!-- Open Graph / WhatsApp / Redes Sociais -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://agrofito.org/">
-<meta property="og:title" content="AgroFito — Consulta de Produtos Fitofarmacêuticos">
-<meta property="og:description" content="Pesquisa integrada de produtos fitofarmacêuticos, culturas e finalidades autorizadas pela DGAV/SIFITO em Portugal.">
+<meta property="og:title" content="AgroFito — Consultas e Cálculos para Produtos Fitofarmacêuticos">
+<meta property="og:description" content="Pesquise produtos e usos autorizados pela DGAV/SIFITO, consulte LMR e calcule volume de calda, débito dos bicos, velocidade e pressão.">
 <meta property="og:locale" content="pt_PT">
 <!-- Schema.org (Dados Estruturados) -->
 <script type="application/ld+json">
@@ -27,7 +27,7 @@
 "url": "https://agrofito.org/",
 "applicationCategory": "BusinessApplication",
 "operatingSystem": "All",
-"description": "Ferramenta de consulta avançada de produtos fitofarmacêuticos e finalidades autorizadas em Portugal com base nos dados oficiais da DGAV/SIFITO.",
+"description": "Consulta de produtos fitofarmacêuticos e usos autorizados em Portugal (DGAV/SIFITO), limites máximos de resíduos e calculadoras de apoio à pulverização.",
 "author": {
 "@type": "Person",
 "name": "Francisco Cabral",
@@ -49,6 +49,12 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 .hero p{font-size:.85rem;opacity:.8;max-width:540px;margin:0 auto;line-height:1.5}
 .hero a{color:var(--lime2);text-decoration:underline}
 .modules-section{flex:1;padding:1.25rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.group{width:100%;max-width:1000px}
+.group-head{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap;margin:0 0 .6rem;padding-bottom:.35rem;border-bottom:2px solid var(--lime2)}
+.group-head h3{font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--g2)}
+.group-head p{font-size:.76rem;color:var(--muted)}
+.group .notice-bar{margin-top:1rem;max-width:none}
+.modules-section{gap:1.6rem}
 .modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;width:100%;max-width:1000px}
 .module-card{background:var(--paper);border-radius:12px;padding:1.25rem;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:.6rem;transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;border:1.5px solid var(--border)}
 .module-card:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(0,0,0,.14);border-color:var(--g3)}
@@ -88,15 +94,17 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 </svg>
 <div class="logo-text">
 <h1><span>Agro</span>Fito</h1>
-<p>Ferramenta de Consulta de Produtos Fitofarmacêuticos</p>
+<p>Consultas e Cálculos para Produtos Fitofarmacêuticos</p>
 </div>
 </header>
 <div class="hero">
-<h2>Consulta de Produtos Fitofarmacêuticos</h2>
+<h2>Consultas e Cálculos para Produtos Fitofarmacêuticos</h2>
 <p>Pesquisa de produtos autorizados e cancelados em Portugal, com dados oficiais da <a href="https://www.dgav.pt" target="_blank" rel="noopener noreferrer">DGAV</a>. Ferramentas técnicas de cálculo e suporte para a pulverização.</p>
 </div>
 <div class="modules-section">
 <!-- changes-highlight removido a pedido -->
+<section class="group" aria-labelledby="g-consultar">
+<div class="group-head"><h3 id="g-consultar">Consultar</h3><p>Produtos, usos autorizados e limites de resíduos</p></div>
 <div class="modules-grid">
 <a class="module-card" href="usos.html">
 <div class="module-icon">📋</div>
@@ -129,6 +137,17 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 </div>
 <span class="module-cta">Consultar <span class="arrow">→</span></span>
 </a>
+</div>
+<div class="notice-bar">
+<span class="icon">⚠️</span>
+<span>
+<strong>Aviso:</strong> Os dados públicos da DGAV/SIFITO e dos Limites Máximos de Resíduos são atualizados semanalmente e podem não refletir alterações recentes. Consulte sempre as páginas oficiais.
+</span>
+</div>
+</section>
+<section class="group" aria-labelledby="g-calcular">
+<div class="group-head"><h3 id="g-calcular">Calcular e aplicar</h3><p>Calculadoras de apoio à pulverização</p></div>
+<div class="modules-grid">
 <a class="module-card" href="tecnicas.html">
 <div class="module-icon">🚜</div>
 <h3>Técnicas de Aplicação</h3>
@@ -163,12 +182,7 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 <span class="module-cta">Consultar <span class="arrow">→</span></span>
 </a>
 </div>
-<div class="notice-bar">
-<span class="icon">⚠️</span>
-<span>
-<strong>Aviso:</strong> Os dados públicos da DGAV/SIFITO e dos Limites Máximos de Resíduos são atualizados semanalmente e podem não refletir alterações recentes. Consulte sempre as páginas oficiais.
-</span>
-</div>
+</section>
 <div class="install-card" id="install-card">
 <span class="install-icon">📲</span>
 <span class="install-text">Instalar no telemóvel/PC</span>
@@ -178,7 +192,7 @@ header{background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 10
 <div class="attribution">
 <p><strong>Páginas Oficiais:</strong> DGAV/<a href="https://sifito.dgav.pt/" target="_blank" rel="noopener noreferrer">SIFITO</a> &nbsp;·&nbsp; Comissão Europeia/<a href="https://food.ec.europa.eu/plants/pesticides/eu-pesticides-database_en" target="_blank" rel="noopener noreferrer">EU Pesticides Database</a></p>
 <p style="margin-top:.4rem;opacity:.8;font-size:.72rem">
-Projeto independente, sem afiliação com a DGAV nem com a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; V1.5.1
+Projeto independente, sem afiliação com a DGAV nem com a União Europeia, por <a href="mailto:info@agrofito.org">Francisco Cabral</a> &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; V1.6
 </p>
 <p style="margin-top:.5rem;opacity:.55;font-size:.68rem">
 <strong>Privacidade:</strong> não recolhemos dados pessoais. Os ficheiros importados ficam guardados só no seu navegador.

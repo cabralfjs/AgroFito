@@ -974,7 +974,9 @@ function closeDetail(e){if(e&&e.target!==document.getElementById('detail-overlay
 /* ══ UTILS ══ */
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'A carregar…';document.getElementById('loading-overlay').classList.add('active');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('active');}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+// Só aceita ligações http(s); qualquer outro esquema (ex.: javascript:) é descartado
+function safeUrl(u){u=String(u||'').trim();return /^https?:\/\//i.test(u)?u:'#';}
 
 /* ══ EVENTS ══ */
 let st;

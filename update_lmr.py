@@ -39,6 +39,7 @@ raiz do repositório, junto com o index.html/produtos.html/usos.html.
 """
 
 import json
+import os
 import re
 import sys
 import time
@@ -85,6 +86,12 @@ REQUEST_HEADERS = {
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9,pt;q=0.8",
 }
+
+
+def _url_segura(u):
+    """Só aceita ligações https; qualquer outra coisa é descartada."""
+    u = str(u or "").strip()
+    return u if re.match(r"^https://", u, re.I) else None
 
 
 def fetch_mrl_flat_file() -> list[dict]:
@@ -209,7 +216,7 @@ def build_lmr_data(culturas: dict, substancias: dict, mrl_index: dict) -> dict:
                     "regulamento": REGULAMENTO_BASE,
                     "url_regulamento": REGULAMENTO_BASE_URL,
                     "alteracao": rec.get("regulation_number"),
-                    "url_alteracao": rec.get("regulation_url"),
+                    "url_alteracao": _url_segura(rec.get("regulation_url")),
                     "url_consulta_ue": url_consulta_ue,
                 })
 
@@ -253,6 +260,21 @@ def write_output_files(lmr_data: dict) -> None:
     """
     lmr_dir = BASE_DIR / "lmr"
     lmr_dir.mkdir(exist_ok=True)
+
+    # Segurança: não substitui os dados bons por um resultado vazio ou
+    # muito reduzido (API da UE em baixo/alterada). AGROFITO_FORCAR=1 ignora.
+    if not lmr_data:
+        raise RuntimeError("nenhuma cultura com LMR — ficheiros anteriores mantidos")
+    antigo = lmr_dir / "_index.json"
+    if antigo.exists() and not os.environ.get("AGROFITO_FORCAR"):
+        try:
+            n_antigo = len(json.loads(antigo.read_text(encoding="utf-8")))
+        except (ValueError, OSError):
+            n_antigo = 0
+        if n_antigo and len(lmr_data) < n_antigo * 0.8:
+            raise RuntimeError(
+                f"{len(lmr_data)} culturas vs {n_antigo} anteriores (quebra > 20 %) "
+                f"— ficheiros anteriores mantidos")
 
     index: dict[str, str] = {}
     slugs_usados: dict[str, int] = {}

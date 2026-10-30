@@ -2,6 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AgroFito — Condições de Utilização</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52'%3E%3Ccircle cx='26' cy='26' r='26' fill='%230f3d22'/%3E%3Cpath d='M26 44 C26 44 12 34 12 21 C12 13 18 8 26 8 C34 8 40 13 40 21 C40 34 26 44 26 44Z' fill='%237cb83a'/%3E%3C/svg%3E">
@@ -330,7 +331,7 @@ hr.dp-sep{border:none;border-top:1px solid var(--border);margin:.75rem 0}
     <h1 style="font-size:.88rem;font-weight:700;letter-spacing:-.01em">Condições de Utilização</h1>
     <p style="font-size:.62rem;opacity:.65;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
       Não dispensa a consulta da página oficial em
-      <a href="https://sifito.dgav.pt/" target="_blank" style="color:var(--lime2);text-decoration:underline">sifito.dgav.pt</a>
+      <a href="https://sifito.dgav.pt/" target="_blank" rel="noopener noreferrer" style="color:var(--lime2);text-decoration:underline">sifito.dgav.pt</a>
       &nbsp;·&nbsp; Francisco Cabral
     </p>
   </div>
@@ -542,6 +543,61 @@ async function dbSet(key,val){
   });
 }
 
+/* ══ SEGURANÇA: validação e origem dos dados importados ══ */
+const _CTRL=/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g;
+const _MAX_REG=600000,_MAX_STR=20000;
+const CHAVES_IMPORT=['produto','numero'];
+async function dbDel(key){const db=await openDB();return new Promise((res,rej)=>{const req=db.transaction(STORE,'readwrite').objectStore(STORE).delete(key);req.onsuccess=()=>res();req.onerror=e=>rej(e.target.error);})}
+/* Valida e limpa registos importados: só objetos simples com valores de texto;
+   exige os campos-chave em ≥90 % dos registos; descarta estados desconhecidos. */
+function sanitizeRecords(records,camposChave){
+  if(!Array.isArray(records)) throw new Error('Formato inválido: esperava-se uma lista de registos.');
+  if(!records.length) throw new Error('O ficheiro não tem registos.');
+  if(records.length>_MAX_REG) throw new Error('Ficheiro demasiado grande.');
+  const estadosOk=new Set(ESTADOS.map(e=>e.label));
+  let ok=0;const out=new Array(records.length);
+  for(let i=0;i<records.length;i++){
+    const r=records[i];
+    if(r===null||typeof r!=='object'||Array.isArray(r)) throw new Error('Registo inválido na posição '+(i+1)+'.');
+    const o={};
+    for(const k of Object.keys(r)){
+      if(k==='__proto__'||k==='constructor'||k==='prototype') continue;
+      const v=r[k];
+      if(typeof v==='string') o[k]=v.replace(_CTRL,'').slice(0,_MAX_STR);
+      else if(typeof v==='number'||typeof v==='boolean') o[k]=String(v);
+      else o[k]='';
+    }
+    if(!estadosOk.has(o.estado)) o.estado='';
+    if(camposChave.every(c=>o[c])) ok++;
+    out[i]=o;
+  }
+  if(ok/out.length<0.9) throw new Error('O ficheiro não tem o formato esperado (campos obrigatórios em falta).');
+  return out;
+}
+async function reporDadosOficiais(){
+  if(!confirm('Apagar os dados importados guardados neste navegador e voltar a carregar os dados oficiais do AgroFito?')) return;
+  try{for(const est of ESTADOS){await dbDel('data_'+est.key);await dbDel('date_'+est.key);await dbDel('origem_'+est.key);}}catch(e){console.warn(e);}
+  location.reload();
+}
+/* Aviso visível sempre que algum dataset em uso foi importado manualmente. */
+async function mostrarAvisoOrigem(){
+  let importado=false;
+  try{for(const est of ESTADOS){if(await dbGet('origem_'+est.key)==='importado'){importado=true;break;}}}catch(e){}
+  let b=document.getElementById('origem-banner');
+  if(!importado){if(b)b.remove();return;}
+  if(b)return;
+  b=document.createElement('div');b.id='origem-banner';
+  b.style.cssText='background:#fff3cd;border-bottom:2px solid #e0a800;color:#664d03;padding:.55rem 1rem;font-size:.78rem;line-height:1.45;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap';
+  const t=document.createElement('span');
+  t.textContent='⚠️ Está a ver dados importados manualmente neste navegador. Não são os dados oficiais do AgroFito e podem estar desatualizados ou incorretos.';
+  const btn=document.createElement('button');
+  btn.textContent='Repor dados oficiais';
+  btn.style.cssText='background:#664d03;color:#fff;border:none;border-radius:6px;padding:.35rem .75rem;font-size:.76rem;font-weight:600;cursor:pointer;font-family:inherit';
+  btn.addEventListener('click',reporDadosOficiais);
+  b.append(t,btn);
+  const tb=document.getElementById('toolbar');tb.parentNode.insertBefore(b,tb);
+}
+
 /* ══════════════ FAVORITOS ══════════════ */
 let FAVORITES=new Set();
 function fidOf(r){ return [r.numero,r.cultura,r.inimigo,r.produto,r.dose].join('|'); }
@@ -649,7 +705,7 @@ async function init(){
       const records=Array.isArray(json)?json:(json.records||json);
       records.forEach(rec=>{if(!rec.estado)rec.estado=est.label;});
       DATASETS[est.key]=records;
-      dbSet('data_'+est.key,records).catch(()=>{});
+      dbSet('data_'+est.key,records).catch(()=>{});dbSet('origem_'+est.key,'servidor').catch(()=>{});
       return est.key;
     }catch(e){ return null; /* ficheiro não disponível (local) — ignora */ }
   }));
@@ -681,13 +737,13 @@ async function openUpdateUI(){
       const records=Array.isArray(json)?json:(json.records||json);
       records.forEach(rec=>{if(!rec.estado)rec.estado=est.label;});
       DATASETS[est.key]=records;
-      await dbSet('data_'+est.key,records);
+      await dbSet('data_'+est.key,records);await dbSet('origem_'+est.key,'servidor');
       updated++;
     }catch(e){}
   }
   if(updated>0){
     hideLoading();
-    rebuildALL(); buildSelects(); updateHeaderMeta(); applyFilters();
+    rebuildALL(); buildSelects(); updateHeaderMeta(); applyFilters(); mostrarAvisoOrigem();
     return;
   }
   // Servidor não disponível — mostra importação manual
@@ -718,7 +774,7 @@ async function handleFile(file){
       const text=await file.text();
       const parsed=JSON.parse(text);
       records=Array.isArray(parsed)?parsed:(parsed.records||parsed.data||parsed);
-      if(parsed.date) fileDate=parsed.date;
+      if(typeof parsed.date==='string') fileDate=parsed.date.replace(_CTRL,'').slice(0,40);
     } else {
       pl.textContent='A ler Excel…'; pf.style.width='40%';
       const ab=await file.arrayBuffer();
@@ -730,6 +786,7 @@ async function handleFile(file){
     }
 
     // Detectar a que dataset pertence pelo campo estado ou pelo nome do ficheiro
+    records = sanitizeRecords(records, CHAVES_IMPORT);
     let estadoKey = detectEstadoKey(file.name, records);
     pl.textContent=`A guardar ${records.length.toLocaleString('pt')} registos [${estadoKey}]…`;
     pf.style.width='85%';
@@ -741,6 +798,7 @@ async function handleFile(file){
     DATASETS[estadoKey] = records;
     await dbSet('data_'+estadoKey, records);
     await dbSet('date_'+estadoKey, fileDate);
+    await dbSet('origem_'+estadoKey, 'importado');
     pf.style.width='100%'; pl.textContent='✅ Concluído!';
 
     await new Promise(r=>setTimeout(r,500));
@@ -854,6 +912,7 @@ async function loadDataset(key){
     records.forEach(rec=>{ if(!rec.estado) rec.estado=est.label; });
     DATASETS[key] = records;
     await dbSet('data_'+key, records);
+    await dbSet('origem_'+key, 'servidor');
   } catch(e){
     hideLoading();
     alert(`Não foi possível carregar "${est.label}".\nSe estiver a correr localmente, importe o ficheiro ${est.file} manualmente.`);
@@ -895,6 +954,7 @@ async function showApp(){
   await ensureDatasetsForEstado(document.getElementById('f-estado').value);
   rebuildALL();
   updateHeaderMeta();
+  mostrarAvisoOrigem();
   document.getElementById('toolbar').classList.add('active');
   document.getElementById('legend-bar').classList.add('active');
   document.getElementById('validade-bar').classList.add('active');
@@ -1451,7 +1511,7 @@ function renderLMRBlocos(r, dadosCultura){
     const valores=Array.isArray(info)?info:[info];
     return valores.map(v=>`
       <div class="lmr-item ${v.is_default?'lmr-default':'lmr-ok'}">
-        <strong>${esc(sub)}</strong> — ${v.mrl} mg/kg
+        <strong>${esc(sub)}</strong> — ${esc(v.mrl)} mg/kg
         ${v.is_default?'<span class="lmr-badge">valor por defeito</span>':''}
         <div class="lmr-meta">
           Produto UE: ${esc(v.produto_eu)}${v.regulamento?` · <a href="${esc(safeUrl(v.url_regulamento))}" target="_blank" rel="noopener">${esc(v.regulamento)}</a>`:''}

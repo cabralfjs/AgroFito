@@ -1,0 +1,143 @@
+name: AgroFito — Actualizar todos os dados
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+# Sem permissões por defeito; cada job pede apenas o que precisa.
+permissions: {}
+
+# Os dois workflows de dados fazem push para main: nunca correm em simultâneo.
+concurrency:
+  group: agrofito-dados
+  cancel-in-progress: false
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────
+  # 1) Recolher: corre o browser (Chromium) a navegar no SIFITO.
+  #    SEM permissão de escrita e SEM credenciais Git guardadas, para que
+  #    uma página maliciosa nunca tenha acesso a um token com escrita.
+  # ────────────────────────────────────────────────────────────────────
+  recolher:
+    name: Recolher dados do SIFITO
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Configurar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Actualizar Condições de Utilização (4 tabelas)
+        run: python update_sifito.py
+
+      - name: Actualizar Produtos Fitofarmacêuticos (4 tabelas)
+        run: python update_produtos.py
+
+      - name: Guardar ficheiros gerados
+        uses: actions/upload-artifact@v4
+        with:
+          name: dados
+          if-no-files-found: error
+          retention-days: 3
+          path: |
+            data_autorizadas.json
+            data_canceladas_venda_permitida.json
+            data_canceladas_venda_interdita_util_permitida.json
+            data_canceladas_venda_util_interditas.json
+            prod_autorizadas.json
+            prod_canceladas_venda_permitida.json
+            prod_canceladas_venda_interdita_util_permitida.json
+            prod_canceladas_venda_util_interditas.json
+
+  # ────────────────────────────────────────────────────────────────────
+  # 2) Publicar: valida os ficheiros e faz commit. Não corre browser.
+  # ────────────────────────────────────────────────────────────────────
+  publicar:
+    name: Validar e publicar
+    needs: recolher
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configurar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Obter ficheiros gerados
+        uses: actions/download-artifact@v4
+        with:
+          name: dados
+          path: .
+
+      - name: Validar ficheiros recebidos
+        env:
+          ESPERADOS: >-
+            data_autorizadas.json
+            data_canceladas_venda_permitida.json
+            data_canceladas_venda_interdita_util_permitida.json
+            data_canceladas_venda_util_interditas.json
+            prod_autorizadas.json
+            prod_canceladas_venda_permitida.json
+            prod_canceladas_venda_interdita_util_permitida.json
+            prod_canceladas_venda_util_interditas.json
+        run: |
+          # 1) Só podem ter mudado os 8 ficheiros esperados.
+          for f in $(git status --porcelain | awk '{print $2}'); do
+            case " $ESPERADOS " in
+              *" $f "*) ;;
+              *) echo "Ficheiro inesperado alterado: $f"; exit 1 ;;
+            esac
+          done
+          # 2) Cada ficheiro tem de ser JSON válido com registos.
+          python - <<'PY'
+          import json, os, sys
+          for f in os.environ["ESPERADOS"].split():
+              d = json.load(open(f, encoding="utf-8"))
+              if not isinstance(d, dict) or not isinstance(d.get("records"), list) or not d["records"]:
+                  sys.exit(f"{f}: formato inválido ou sem registos")
+              print(f"{f}: {len(d['records']):,} registos OK")
+          PY
+
+      - name: Commit e push (se houver mudanças)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data_autorizadas.json \
+            data_canceladas_venda_permitida.json \
+            data_canceladas_venda_interdita_util_permitida.json \
+            data_canceladas_venda_util_interditas.json \
+            prod_autorizadas.json \
+            prod_canceladas_venda_permitida.json \
+            prod_canceladas_venda_interdita_util_permitida.json \
+            prod_canceladas_venda_util_interditas.json
+          if git diff --staged --quiet; then
+            echo "Sem alterações — nada a fazer."
+          else
+            python compute_changes.py
+            git add alteracoes.json
+            HOJE=$(date +'%d/%m/%Y')
+            git commit -m "🌿 AgroFito — dados actualizados $HOJE"
+            git pull --rebase origin "$GITHUB_REF_NAME"
+            git push
+          fi

@@ -1,0 +1,9 @@
+# Dependências dos scripts de atualização (usadas por .github/workflows/update.yml).
+# Depois de testar uma execução com sucesso, fixa a versão exata do playwright
+# (ex.: playwright==1.xx.y; vê com `pip index versions playwright`) e deixa o
+# Dependabot propor as atualizações.
+playwright>=1.40,<2
+openpyxl==3.1.5
+# O openpyxl usa-o automaticamente para ler XML de forma segura (proteção
+# contra ficheiros .xlsx maliciosos).
+defusedxml==0.7.1

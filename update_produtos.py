@@ -6,7 +6,7 @@ Exporta as 4 tabelas de Produtos Fitofarmacêuticos do SIFITO.
 Com retry automático por tabela e tolerância a falhas parciais.
 """
 
-import asyncio, json, sys, tempfile
+import asyncio, json, os, re, sys, tempfile
 from datetime import datetime
 from pathlib import Path
 from openpyxl import load_workbook
@@ -18,6 +18,8 @@ TIMEOUT_DL   = 180_000
 MAX_RETRIES  = 3
 RETRY_DELAY  = 30
 BASE_DIR     = Path(__file__).parent
+
+CAMPOS_CHAVE = ("designacao", "numero")
 
 COL_MAP = {
     0:  "designacao",
@@ -64,7 +66,7 @@ def extract_funcao_tipo(s):
     for t in FUNC_TYPES:
         if t.upper() in up:
             return t
-    return s.split()[0].slice(0, 25) if s.strip() else ''
+    return s.split()[0][:25] if s and s.strip() else ''
 
 
 async def download_xlsx(page, url: str) -> bytes:
@@ -138,13 +140,61 @@ def xlsx_to_records(xlsx_bytes: bytes, estado: str) -> list[dict]:
     return records
 
 
-def save_json(records, output, date):
+
+# ── Segurança: validação antes de gravar ──────────────────────────────
+# Impede que um ficheiro vazio, truncado ou com formato inesperado (SIFITO
+# em baixo, página alterada, dados adulterados) substitua os dados bons.
+# Para forçar manualmente uma actualização legítima com grande quebra de
+# registos, define a variável de ambiente AGROFITO_FORCAR=1.
+CTRL_RE        = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+MAX_CAMPO      = 20_000   # caracteres por campo
+RATIO_MINIMO   = 0.80     # novo >= 80 % do número de registos anterior
+PREENCHIDOS    = 0.90     # >= 90 % dos registos com os campos-chave preenchidos
+
+def limpar_registos(records):
+    """Remove caracteres de controlo, limita o tamanho dos campos e
+    descarta linhas completamente vazias."""
+    limpos = []
+    for r in records:
+        novo = {}
+        for k, v in r.items():
+            novo[k] = CTRL_RE.sub("", v)[:MAX_CAMPO] if isinstance(v, str) else v
+        if any(v for k, v in novo.items() if k != "estado"):
+            limpos.append(novo)
+    return limpos
+
+
+def validar_antes_de_gravar(path, records, campos_chave):
+    n = len(records)
+    if n == 0:
+        raise RuntimeError("zero registos — ficheiro anterior mantido")
+    ok = sum(1 for r in records if all(r.get(c) for c in campos_chave))
+    if ok / n < PREENCHIDOS:
+        raise RuntimeError(
+            f"só {ok}/{n} registos têm {campos_chave} preenchidos — formato "
+            f"inesperado, ficheiro anterior mantido")
+    if path.exists() and not os.environ.get("AGROFITO_FORCAR"):
+        try:
+            antigos = len(json.loads(path.read_text(encoding="utf-8")).get("records", []))
+        except (ValueError, OSError):
+            antigos = 0
+        if antigos and n < antigos * RATIO_MINIMO:
+            raise RuntimeError(
+                f"{n} registos vs {antigos} anteriores (quebra > "
+                f"{round((1 - RATIO_MINIMO) * 100)} %) — ficheiro anterior mantido")
+
+
+def save_json(records, output, date, campos_chave=CAMPOS_CHAVE):
     path = BASE_DIR / output
-    path.write_text(
+    records = limpar_registos(records)
+    validar_antes_de_gravar(path, records, campos_chave)
+    tmp = path.with_name(path.name + ".tmp")          # escrita atómica
+    tmp.write_text(
         json.dumps({"date": date, "records": records},
                    ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8"
     )
+    os.replace(tmp, path)
     sz = path.stat().st_size / 1_048_576
     print(f"   💾  {output}  ({len(records):,} registos · {sz:.1f} MB)")
 

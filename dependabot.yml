@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Mantém as actions dos workflows atualizadas (e com correções de segurança).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  # Mantém as dependências Python dos scripts de atualização.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"

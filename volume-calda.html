@@ -198,8 +198,8 @@ summary{padding:.55rem 0;font-size:.85rem}
 </div>
 <div>
 <h4>Exemplo: culturas baixas</h4>
-<p>Herbicida para preparar uma parcela para a sementeira de trigo, com <i>Db</i> = 0,5 L/min em cada um dos <i>n</i> = 28 bicos, <i>V</i> = 6 km/h e <i>L</i> = 15 m.</p>
-<div class="formula"><div class="eq sm"><span><i>Dp</i> =</span><span class="fr"><span>600 × 0,5 × 28</span><span>6 × 15</span></span></div><div class="eq-r">= 93,33 L/ha</div></div>
+<p>Herbicida para preparar uma parcela para a sementeira de trigo, com <i>Db</i> = 0,5 L/min em cada um dos <i>n</i> = 28 bicos, <i>V</i> = 3 km/h e <i>L</i> = 14 m.</p>
+<div class="formula"><div class="eq sm"><span><i>Dp</i> =</span><span class="fr"><span>600 × 0,5 × 28</span><span>3 × 14</span></span></div><div class="eq-r">= 200 L/ha</div></div>
 </div>
 <div>
 <h4>Exemplo: pomar de maçã</h4>
@@ -214,12 +214,12 @@ summary{padding:.55rem 0;font-size:.85rem}
 <div><label for="f-tipo">Tipo de cultura</label>
 <select id="f-tipo"><option value="barra">Culturas baixas: pulverizador de barra</option><option value="d3">Culturas altas: pomares e vinhas</option></select></div>
 <div><label for="f-calc">O que pretende calcular</label>
-<select id="f-calc"><option value="dp">Débito do pulverizador, Dp (L/ha)</option><option value="d">Débito médio de cada bico, Db (L/min)</option><option value="v">Velocidade de avanço, V (km/h)</option></select></div>
+<select id="f-calc"><option value="dp">Débito do pulverizador, Dp (L/ha)</option><option value="d">Débito médio do bico, Db (L/min)</option><option value="v">Velocidade de avanço, V (km/h)</option></select></div>
 </div>
 <div class="fields">
-<div id="w-D"><label for="f-D" id="l-D">Débito médio de cada bico, <i>Db</i> (L/min)</label><input id="f-D" type="text" inputmode="decimal" placeholder="ex.: 0,5"></div>
+<div id="w-D"><label for="f-D" id="l-D">Débito médio do bico, <i>Db</i> (L/min)</label><input id="f-D" type="text" inputmode="decimal" placeholder="ex.: 0,5"></div>
 <div id="w-n"><label for="f-n">Número de bicos, <i>n</i></label><input id="f-n" type="text" inputmode="decimal" placeholder="ex.: 28"></div>
-<div id="w-v"><label for="f-v">Velocidade de avanço, <i>V</i> (km/h)</label><input id="f-v" type="text" inputmode="decimal" placeholder="ex.: 6"></div>
+<div id="w-v"><label for="f-v">Velocidade de avanço, <i>V</i> (km/h)</label><input id="f-v" type="text" inputmode="decimal" placeholder="ex.: 3"></div>
 <div id="w-W"><label for="f-W" id="l-W">Largura de trabalho, <i>L</i> (m)</label><input id="f-W" type="text" inputmode="decimal" placeholder="ex.: 15"></div>
 <div id="w-DP"><label for="f-DP">Débito do pulverizador pretendido, <i>Dp</i> (L/ha)</label><input id="f-DP" type="text" inputmode="decimal" placeholder="ex.: 93"></div>
 <div id="w-cap"><label for="f-cap">Capacidade do depósito (L), opcional</label><input id="f-cap" type="text" inputmode="decimal" placeholder="ex.: 600"></div>
@@ -264,7 +264,7 @@ summary{padding:.55rem 0;font-size:.85rem}
 <div class="calc">
 <h4>Calculadora de débito dos bicos</h4>
 <div class="fields">
-<div><label for="n-v">Velocidade de avanço, <i>V</i> (km/h)</label><input id="n-v" type="text" inputmode="decimal" placeholder="ex.: 6"></div><div><label for="n-L">Largura de trabalho, <i>L</i> (m)</label><input id="n-L" type="text" inputmode="decimal" placeholder="ex.: 15"></div><div><label for="n-DP">Débito do pulverizador pretendido, <i>Dp</i> (L/ha)</label><input id="n-DP" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="n-N">Número de bicos, <i>n</i></label><input id="n-N" type="text" inputmode="decimal" placeholder="ex.: 30"></div>
+<div><label for="n-v">Velocidade de avanço, <i>V</i> (km/h)</label><input id="n-v" type="text" inputmode="decimal" placeholder="ex.: 6"></div><div><label for="n-L">Largura de trabalho, <i>L</i> (m)</label><input id="n-L" type="text" inputmode="decimal" placeholder="ex.: 15"></div><div><label for="n-DP">Débito pretendido, <i>Dp</i> (L/ha)</label><input id="n-DP" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="n-N">Número de bicos, <i>n</i></label><input id="n-N" type="text" inputmode="decimal" placeholder="ex.: 30"></div>
 </div>
 
 <div class="actions">
@@ -307,7 +307,7 @@ summary{padding:.55rem 0;font-size:.85rem}
 <div class="calc">
 <h4>Calculadora de velocidade de pulverização</h4>
 <div class="fields">
-<div><label for="s-DPa">Débito do pulverizador atual, <i>Dp</i><sub>atual</sub> (L/ha)</label><input id="s-DPa" type="text" inputmode="decimal" placeholder="ex.: 300"></div><div><label for="s-DPp">Débito do pulverizador pretendido, <i>Dp</i><sub>pretendido</sub> (L/ha)</label><input id="s-DPp" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="s-va">Velocidade atual, <i>V</i><sub>atual</sub> (km/h)</label><input id="s-va" type="text" inputmode="decimal" placeholder="ex.: 5"></div>
+<div><label for="s-DPa">Débito do pulverizador atual, <i>Dp</i><sub>atual</sub> (L/ha)</label><input id="s-DPa" type="text" inputmode="decimal" placeholder="ex.: 300"></div><div><label for="s-DPp">Débito pretendido, <i>Dp</i><sub>pretendido</sub> (L/ha)</label><input id="s-DPp" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="s-va">Velocidade atual, <i>V</i><sub>atual</sub> (km/h)</label><input id="s-va" type="text" inputmode="decimal" placeholder="ex.: 5"></div>
 </div>
 <details>
 <summary>Não sei a velocidade atual: calcular por distância e tempo</summary>
@@ -357,7 +357,7 @@ summary{padding:.55rem 0;font-size:.85rem}
 <div class="calc">
 <h4>Calculadora de pressão de trabalho</h4>
 <div class="fields">
-<div><label for="p-DPa">Débito do pulverizador atual, <i>Dp</i><sub>atual</sub> (L/ha)</label><input id="p-DPa" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="p-DPp">Débito do pulverizador pretendido, <i>Dp</i><sub>pretendido</sub> (L/ha)</label><input id="p-DPp" type="text" inputmode="decimal" placeholder="ex.: 240"></div><div><label for="p-Pa">Pressão atual, <i>P</i><sub>atual</sub></label><div class="row2"><input id="p-Pa" type="text" inputmode="decimal" placeholder="ex.: 3" aria-label="Pressão atual"><select id="p-unit" aria-label="Unidade de pressão"><option value="bar">bar</option><option value="kPa">kPa</option><option value="psi">psi</option></select></div></div>
+<div><label for="p-DPa">Débito do pulverizador atual, <i>Dp</i><sub>atual</sub> (L/ha)</label><input id="p-DPa" type="text" inputmode="decimal" placeholder="ex.: 200"></div><div><label for="p-DPp">Débito pretendido, <i>Dp</i><sub>pretendido</sub> (L/ha)</label><input id="p-DPp" type="text" inputmode="decimal" placeholder="ex.: 240"></div><div><label for="p-Pa">Pressão atual, <i>P</i><sub>atual</sub></label><div class="row2"><input id="p-Pa" type="text" inputmode="decimal" placeholder="ex.: 3" aria-label="Pressão atual"><select id="p-unit" aria-label="Unidade de pressão"><option value="bar">bar</option><option value="kPa">kPa</option><option value="psi">psi</option></select></div></div>
 </div>
 
 <div class="actions">
@@ -430,7 +430,7 @@ summary{padding:.55rem 0;font-size:.85rem}
 
   /* 1. Débito do pulverizador: Dp = 600 x D x n / (V x L) */
   const cfg={
-    barra:{W:'Largura de trabalho, <i>L</i> (m)',ph:'ex.: 15',Dph:'ex.: 0,5',nph:'ex.: 28'},
+    barra:{W:'Largura de trabalho, <i>L</i> (m)',ph:'ex.: 14',Dph:'ex.: 0,5',nph:'ex.: 28'},
     d3:{W:'Distância entrelinha, <i>L</i> (m)',ph:'ex.: 4',Dph:'ex.: 2',nph:'ex.: 16'}
   };
   function refresh(){
